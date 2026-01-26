@@ -1,0 +1,193 @@
+/* [2026-01-26 09:30 pm - batch 1.20.0] */
+/* patient/css/settings/layout.css */
+
+/* --- SETTINGS GRID WRAPPER --- */
+.settings-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Split 50/50 as per image */
+    gap: 2rem;
+    height: 100%;
+    max-height: 85vh;
+    padding-bottom: 2rem;
+}
+
+/* --- LEFT PANEL: CONTROLS --- */
+.settings-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    overflow-y: auto;
+    padding-right: 0.5rem; /* Space for scrollbar */
+}
+
+/* The Pink Cards */
+.setting-group-card {
+    background-color: var(--accent-red); /* Matches the salmon/pink in image */
+    border-radius: 25px;
+    padding: 2rem;
+    color: var(--color-surface); /* Dark text on pink */
+    box-shadow: var(--shadow-soft);
+}
+
+.setting-group-card h3 {
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    color: #333; /* Darker contrast for headers */
+}
+
+/* Control Rows */
+.setting-row {
+    margin-bottom: 1.5rem;
+}
+
+.setting-row label {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+/* Input Cluster: Arrows + Number + Slider */
+.control-interface {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* The Pill with Number and Arrows */
+.stepper {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    min-width: 120px;
+    justify-content: space-between;
+}
+
+.step-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+    padding: 0 0.5rem;
+}
+.step-btn:hover { color: black; transform: scale(1.2); }
+
+.value-display {
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 2ch;
+    text-align: center;
+}
+
+/* The Slider */
+.slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: black; /* The black track line */
+    border-radius: 5px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #00E676; /* Bright Green Thumb */
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+/* --- RIGHT PANEL: PREVIEW --- */
+.preview-panel {
+    background-color: #D3D3D3; /* Light Grey background */
+    border-radius: 25px;
+    padding: 2rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* Header Icons (Top Right mockup) */
+.preview-ui-mockup {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 1rem;
+    opacity: 0.5;
+}
+
+/* The Big Avatar Circle */
+.preview-avatar {
+    width: 150px;
+    height: 150px;
+    background-color: red; /* Matching the Red Circle */
+    border: 4px solid #b71c1c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem; /* Dynamic */
+    font-weight: 500;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* The Text Card */
+.preview-card {
+    background-color: var(--accent-red);
+    padding: 2rem;
+    border-radius: 20px;
+    width: 90%;
+    text-align: center;
+}
+
+.preview-text {
+    color: #222;
+    line-height: 1.4;
+    font-weight: 500;
+    /* Font size will be dynamic */
+}
+
+/* Apply Button (Bottom Right) */
+.apply-container {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+.apply-btn {
+    background-color: #76FF03; /* Bright Lime Green */
+    color: #1a3c00;
+    padding: 1rem 3rem;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+}
+
+.apply-btn:hover {
+    transform: scale(1.05);
+    background-color: #64DD17;
+}
