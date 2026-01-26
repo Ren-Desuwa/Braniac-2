@@ -1,27 +1,48 @@
-/* [2026-01-26 04:30 pm - batch 1.14.0] */
+/* [2026-01-26 08:00 pm - batch 1.17.0] */
 /* patient/css/games/layout.css */
 
 /* --- GAMES VIEW LAYOUT --- */
 #view-games.games-layout-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
+    /* Use Place Items Center to center the Wrapper Div */
+    display: grid; 
+    justify-content: center;
+    
     height: 100%;
+    width: 100%;
+}
+
+/* --- NEW WRAPPER DIV --- */
+/* This holds the Panel and Hero side-by-side */
+.games-center-wrapper {
+    display: grid;
+    /* 2 Columns: Panel (Variable) | Hero (Fixed) */
+    grid-template-columns: minmax(400px, 40vw) 300px;
+    
+    /* Tight gap as requested */
+    gap: 0.75rem; 
+    
+    /* Ensure they align at the top */
+    align-items: start;
+    
+    /* Ensure wrapper doesn't exceed screen */
+    max-width: 100%;
 }
 
 /* --- A. GAMES PANEL (LEFT) --- */
 .games-panel {
     background-color: var(--bg-card);
     border-radius: var(--border-radius-lg);
-    max-width: 40vw;
-    /* Tighter padding from previous batch */
     padding: 1.5rem; 
-    
     box-shadow: var(--shadow-card);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     height: 100%;
+    max-height: 85vh;
     overflow-y: auto;
+    
+    /* Width controlled by parent grid */
+    width: 100%; 
 }
 
 /* Filter Tabs */
@@ -53,20 +74,15 @@
 .games-grid { 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
-    
-    /* UPDATED: Center items to handle small fixed cards gracefully */
     justify-items: center;
-    
     gap: 1rem; 
     align-content: start;
 }
 
 /* Game Cards */
 .game-card {
-    /* UPDATED: Fixed size constraints to prevent "Too Big" issue */
     width: 100%; 
-    max-width: 200px; /* Limits size similar to Batch 1.10.0 */
-    
+    max-width: 200px; 
     aspect-ratio: 1 / 1; 
     border-radius: 25px; 
     position: relative; 
@@ -99,32 +115,46 @@
 .card-green { background-color: var(--accent-green); }
 .card-red { background-color: var(--accent-red); }
 
-/* Footer & Start Button */
-.card-footer {
-    height: 70px; width: 100%; display: flex; align-items: center; justify-content: center;
-    transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: absolute; bottom: 0; left: 0; z-index: 2;
+/* --- CARD OVERLAY --- */
+.card-overlay {
+    position: absolute;
+    inset: 0; 
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
 }
-/* Footer Darker Colors */
-.card-yellow .card-footer { background-color: #C0CA33; }
-.card-green .card-footer { background-color: #66BB6A; }
-.card-red .card-footer { background-color: #E68A70; }
 
-.game-card:hover .card-footer { transform: translateY(0); }
+.game-card:hover .card-overlay { opacity: 1; }
 
 .start-btn {
-    background-color: #00E676; color: black; border: none; padding: 0.5rem 1.5rem;
-    border-radius: 20px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
+    background-color: #00E676; 
+    color: black; 
+    border: none; 
+    padding: 0.8rem 2rem;
+    border-radius: 30px; 
+    font-weight: 800; 
+    font-size: 1.1rem; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+    transform: scale(0.9);
+    transition: transform 0.2s;
 }
-.start-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
-
+.start-btn:hover { transform: scale(1); background-color: #00C853; }
 
 /* --- B. GAMES HERO (RIGHT - LEVEL CARD) --- */
 .games-hero {
     display: flex;
     flex-direction: column;
-    height: fit-content;
+    justify-content: flex-start; 
+    
+    width: 100%; /* Fills the grid column */
 }
 
 .games-hero .level-card {
