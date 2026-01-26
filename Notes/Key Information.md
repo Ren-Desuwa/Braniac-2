@@ -48,21 +48,3 @@
 * All libraries (fonts, icons, sounds) must be stored locally on the ESP32, no CDNs.
 
 ---
-
-## CODEBASE STANDARDS (Batch 3.3+)
-
-**1. The 200-Line Limit**
-* No single source file may exceed 200 lines.
-* If a file grows too large, it MUST be split into sub-modules.
-
-**2. Deep Modular Structure**
-* Do not use generic `scripts/` or `styles/` folders.
-* Code must live in `core/` (Universal) or `features/` (Specific).
-
-**3. No ES Modules**
-* The system uses Global Namespacing (`window.MyModule`).
-* Do not use `import` / `export` syntax in JS files.
-
-**4. Absolute Centering (Carousel)**
-* The Carousel layout MUST use `top: 50%; left: 50%; transform: translate(-50%, -50%)`.
-* Do not attempt Flexbox centering for the 3D cards.
