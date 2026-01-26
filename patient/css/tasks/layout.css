@@ -1,0 +1,177 @@
+/* [2026-01-26 03:40 pm - batch 1.11.0] */
+/* patient/css/tasks/layout.css */
+
+/* --- TASKS VIEW CONTAINER --- */
+.tasks-feed {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+}
+
+/* --- ASSIGNMENT CARD (Classroom Style) --- */
+.task-assignment-card {
+    background-color: white;
+    border-radius: var(--border-radius-md);
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.task-assignment-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* --- HEADER SECTION --- */
+.task-assignment-header {
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--bg-app);
+}
+
+.header-icon {
+    background-color: var(--accent-blue);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.header-text {
+    flex: 1;
+}
+
+.header-text h2 {
+    font-size: 1.2rem;
+    color: var(--text-dark);
+    margin-bottom: 0.2rem;
+}
+
+.post-date {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+/* Progress Indicator (Right Side) */
+.header-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.progress-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.circular-progress {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid var(--bg-panel);
+    border-top-color: var(--accent-yellow); /* Active Color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circular-progress.completed {
+    border-color: var(--accent-green);
+    background-color: #e8f5e9;
+    color: var(--accent-green-dark);
+}
+
+.progress-val {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* --- BODY SECTION --- */
+.task-assignment-body {
+    padding: 1.5rem;
+}
+
+.instructions {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #444;
+}
+
+/* --- GAME ATTACHMENTS (The "Google Classroom Attachment" look) --- */
+.game-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.game-attachment-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 0.5rem;
+    padding-right: 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+.game-attachment-link:hover {
+    background-color: var(--bg-app);
+}
+
+.attachment-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background-color: #eee;
+}
+.thumb-yellow { background-color: var(--accent-yellow); }
+.thumb-green { background-color: var(--accent-green); }
+
+.attachment-info {
+    flex: 1;
+}
+
+.attachment-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: var(--text-dark);
+}
+
+.attachment-info span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.play-sm-btn {
+    background-color: transparent;
+    border: 2px solid var(--accent-blue);
+    color: var(--accent-blue);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.game-attachment-link:hover .play-sm-btn {
+    background-color: var(--accent-blue);
+    color: white;
+}

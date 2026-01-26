@@ -1,0 +1,78 @@
+/* [2026-01-26 01:25 pm - batch 1.5.0] */
+/* patient/css/base/global.css */
+
+:root {
+    /* --- COZY GAME PALETTE --- */
+    /* Backgrounds */
+    --bg-app: #FDF6E3;        /* Warm Cream - Easy on eyes */
+    --bg-card: #FFFFFF;       /* Pure White */
+    --bg-panel: #EEE8D5;      /* Darker Cream for contrast */
+
+    /* Typography */
+    --text-dark: #586E75;     /* Soft Navy/Grey - High readability, no harsh black */
+    --text-dim: #93A1A1;      /* Muted text */
+    --text-light: #FDF6E3;    /* Text on colored buttons */
+
+    /* Game Accents (Pastels) */
+    --accent-blue: #89CFF0;   /* Baby Blue (Profile) */
+    --accent-blue-dark: #5DA5D0;
+    
+    --accent-green: #A7E4A7;  /* Mint Green (Success/Go) */
+    --accent-green-dark: #7CC07C;
+
+    --accent-yellow: #FFF59D; /* Custard (Warning/Action) */
+    --accent-yellow-dark: #E6D865;
+
+    --accent-red: #FFAB91;    /* Salmon (Alert/Badge) */
+    --accent-red-dark: #E68A70;
+
+    --accent-grey: #E0E0E0;   /* Neutral Buttons */
+    --accent-grey-dark: #BDBDBD;
+
+    /* UI Effects */
+    --shadow-soft: 0 8px 0 rgba(0,0,0,0.05); /* "Chunky" shadow for depth */
+    --shadow-card: 0 4px 12px rgba(88, 110, 117, 0.1);
+    --border-radius-lg: 25px;
+    --border-radius-md: 16px;
+    --border-radius-sm: 12px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif; /* Rounded, friendly font recommended */
+    background-color: var(--bg-app);
+    color: var(--text-dark);
+    height: 100vh;
+    padding: 1.5rem;
+    overflow: hidden;
+}
+
+/* Base Components */
+.card {
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+    border: 2px solid rgba(0,0,0,0.03); /* Subtle border definition */
+}
+
+/* Button Reset & Game Feel */
+button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.1s ease-out;
+    position: relative;
+    user-select: none;
+}
+
+/* "Clicky" Effect for all buttons */
+button:active {
+    transform: translateY(2px) scale(0.98);
+    filter: brightness(0.95);
+}

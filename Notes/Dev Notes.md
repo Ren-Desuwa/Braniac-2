@@ -66,3 +66,9 @@
 - [ ] **Flexion Game:** e.g., "Climbing a Ladder" (Up and down).
 - [ ] **Rotation Game:** e.g., "Turning a Valve" or "Dialing a Safe".
 - [ ] **Camera Integration:** (If feasible) Use a webcam to track body posture alongside gyro data.
+      
+## 6.  Movements for games
+- flexion
+- [ ] doremi game in tiktok but wit harm
+- extension
+- [ ] hole and ball game, push to increase ball size to fill the hole

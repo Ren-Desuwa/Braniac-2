@@ -6,7 +6,6 @@
       {
         "id": "5d40112b82e44306",
         "type": "tabs",
-        "dimension": 50,
         "children": [
           {
             "id": "83cb426f4c475be3",
@@ -14,29 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Structure.md",
+                "file": "Dev Notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Structure"
-            }
-          }
-        ]
-      },
-      {
-        "id": "f507480984f26e47",
-        "type": "tabs",
-        "dimension": 50,
-        "children": [
-          {
-            "id": "d564bcd422bb01ee",
-            "type": "leaf",
-            "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "title": "Dev Notes"
             }
           }
         ]
@@ -112,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Dev Notes.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -121,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Dev Notes"
             }
           },
           {
@@ -200,11 +183,11 @@
   },
   "active": "83cb426f4c475be3",
   "lastOpenFiles": [
-    "Dev Notes.md",
-    "Structure.md",
     "Change Log.md",
-    "Key Information.md",
+    "Dev Notes.md",
     "Rules.md",
+    "Structure.md",
+    "Key Information.md",
     "Welcome.md"
   ]
 }
