@@ -6,15 +6,20 @@
       {
         "id": "5d40112b82e44306",
         "type": "tabs",
+        "dimension": 50,
         "children": [
           {
             "id": "83cb426f4c475be3",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Structure.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Structure"
             }
           }
         ]
@@ -22,6 +27,7 @@
       {
         "id": "f507480984f26e47",
         "type": "tabs",
+        "dimension": 50,
         "children": [
           {
             "id": "d564bcd422bb01ee",
@@ -194,8 +200,11 @@
   },
   "active": "83cb426f4c475be3",
   "lastOpenFiles": [
-    "structure.md",
-    "changelog.md",
+    "Dev Notes.md",
+    "Rules.md",
+    "Change Log.md",
+    "Structure.md",
+    "Key Information.md",
     "Welcome.md"
   ]
 }
