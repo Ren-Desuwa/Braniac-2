@@ -1,1 +1,116 @@
-test
+/* [2026-01-28 10:00 am - batch 1.48.0] */
+/* patient/games/cookout/cookout-style.css */
+
+body {
+    background-color: #f4f4f4; /* Kitchen counter color */
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #fff 20%, #ddd 100%);
+}
+
+canvas {
+    background: transparent;
+    z-index: 5;
+    /* Border to define the workspace */
+    border-left: 2px solid rgba(0,0,0,0.1);
+    border-right: 2px solid rgba(0,0,0,0.1);
+}
+
+/* --- OVERLAY --- */
+.overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    z-index: 20;
+    text-align: center;
+}
+
+.btn-primary {
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    background: #ff5722; /* Kitchen Orange */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- GUIDE TRACK (Vertical) --- */
+.guide-track {
+    position: absolute;
+    right: 20px; /* Sits on the right side */
+    top: 50%;
+    transform: translateY(-50%);
+    height: 60%;
+    width: 100px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    background: rgba(0,0,0,0.1);
+    border-radius: 20px;
+}
+
+.arrow {
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    margin: 10px 0;
+}
+
+.guide-text {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #333;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* UP STATE (Push) */
+.guide-track.up .arrow {
+    border-bottom: 30px solid #4CAF50; /* Green Up */
+    animation: bounceUp 1s infinite;
+}
+
+/* DOWN STATE (Pull) */
+.guide-track.down .arrow {
+    border-top: 30px solid #FF9800; /* Orange Down */
+    animation: bounceDown 1s infinite;
+}
+
+/* WAIT STATE */
+.guide-track.wait .arrow {
+    border-left: 20px solid #333;
+    border-right: none;
+    border-bottom: 20px solid transparent;
+    border-top: 20px solid transparent;
+    animation: spin 2s infinite linear;
+}
+
+@keyframes bounceUp {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(-10px); opacity: 1; }
+}
+
+@keyframes bounceDown {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(10px); opacity: 1; }
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }

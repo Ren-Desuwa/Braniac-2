@@ -48,3 +48,50 @@
 * All libraries (fonts, icons, sounds) must be stored locally on the ESP32, no CDNs.
 
 ---
+
+# Key Concepts & Constraints
+
+## KEY CONCEPTS (The Pillars)
+**1. REHABILITATION FIRST**
+* The primary goal is stroke recovery.
+* "Success" is defined by patient confidence, not just app performance.
+
+**2. ESP32 WEBSERVER HOSTING**
+* The entire website is served directly from an ESP32 microcontroller.
+* **Constraint:** Bandwidth is limited; asset sizes must be tiny to ensure fast loading.
+* **Strict Offline:** No CDNs. All fonts, scripts, and CSS must be local.
+
+**3. GYROSCOPIC INPUT (MPU-9250)**
+* The "Mouse" is a physical handheld device with an IMU sensor.
+* **Communication:** Real-time WebSocket (`ws://`) stream.
+* **Current State:** Games currently use `mousemove` for testing. This must be swapped to WebSocket listeners for production.
+
+**4. EXOSKELETON CONSTRAINT**
+* Users are strapped into a mechanical arm assist.
+* Range of Motion (ROM) is often physically limited/restricted.
+
+**5. TELEVISION DISPLAY**
+* The UI is viewed from 5-10 feet away.
+* **Design Pattern:** Kiosk / Console UI (Huge text, high contrast).
+* **Implementation:** The `settings.js` Scaling Engine handles this via the `--app-scale` variable.
+
+---
+
+## THINGS TO TAKE NOTE (The Constraints)
+
+**1. AUDIO STRATEGY**
+* **NO SYNTHESIS:** It feels "finicky" or cheap.
+* **PREFERENCE:** Small, high-quality audio assets (MP3/WAV) served from SD Card.
+* **REQUIREMENT:** Must use aggressive Caching.
+
+**2. ASSET OPTIMIZATION**
+* Images must be SVGs where possible.
+* Bitmap images (PNG/JPG) must be compressed.
+
+**3. INPUT LATENCY**
+* The loop from `[Gyro Move] -> [Browser Render]` must be <16ms (60fps).
+* Heavy JS logic in the game loop will cause "floaty" feel.
+
+**4. IFRAME ARCHITECTURE**
+* Games are loaded inside an `iframe` in `launcher.html`.
+* **Constraint:** Games must communicate stats via `window.parent.postMessage`. They cannot directly modify the parent DOM.

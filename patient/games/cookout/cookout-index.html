@@ -1,1 +1,37 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookout: Grill Master</title>
+    <link rel="stylesheet" href="../../css/base/global.css">
+    <link rel="stylesheet" href="cookout-style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div id="grill-zone"></div>
+        <div id="counter-zone"></div>
+
+        <div id="guide-track" class="guide-track vertical up">
+            <div class="arrow-container">
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+                <div class="arrow"></div>
+            </div>
+            <div class="guide-text">PUSH TO GRILL</div>
+        </div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="startScreen" class="overlay">
+            <h1 id="screenTitle">Cookout</h1>
+            <p id="screenDesc">It's Lunch Rush!<br><strong>PUSH</strong> raw burgers to the grill.<br><strong>PULL</strong> cooked burgers to the plate.</p>
+            <button id="startGameBtn" class="btn-primary">Start Grilling</button>
+        </div>
+    </div>
+
+    <script src="cookout-script.js"></script>
+</body>
+</html>

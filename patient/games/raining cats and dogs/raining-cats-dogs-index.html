@@ -1,1 +1,44 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raining Cats & Dogs</title>
+    <link rel="stylesheet" href="../../css/base/global.css">
+    <link rel="stylesheet" href="raining-cats-dogs-style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        
+        <div id="game-bg"></div>
+
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="guide-bottom" class="guide-track state-push">
+            <div class="arrow-group left">
+                <div class="track-arrow">➤</div>
+                <div class="track-arrow">➤</div>
+            </div>
+            
+            <div id="guide-text">PUSH</div>
+            
+            <div class="arrow-group right">
+                <div class="track-arrow">➤</div>
+                <div class="track-arrow">➤</div>
+            </div>
+        </div>
+
+        <div id="startScreen" class="overlay">
+            <h1 id="screenTitle">Raining Pets!</h1>
+            <p id="screenDesc">
+                <strong>PUSH</strong> forward to catch them.<br>
+                <strong>PULL</strong> back to bring them to safety.
+            </p>
+            <button id="startGameBtn" class="btn-primary">Start Catching</button>
+        </div>
+    </div>
+
+    <script src="raining-cats-dogs-script.js"></script>
+</body>
+</html>

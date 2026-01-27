@@ -80,3 +80,62 @@
 
 ## 8. Game Options 
 - [ ] 3, 2, 1 start
+      
+# Recommendations & Architecture Backlog
+
+## 1. Authentication & Roles Refactor
+*The current system assumes a single generic user. We need to split this into two distinct flows.*
+
+- [ ] **Physical Therapist (PT) Login**
+    - **Goal:** Allow the PT to manage patients and set instructions.
+    - **Mechanism:** Standard secure login (Username/Password).
+    - **Status:** Skeleton directory created, `physical-therapist.html` exists but is empty.
+- [x] **Patient Login**
+    - **Goal:** Ultra-low friction login for disabled users.
+    - **Status:** `login.html` implements the mock logic and routing.
+    - **Next Step:** Implement "Image-based Login" (Click face to login).
+
+## 2. Hardware & Connectivity
+*Improvements for the physical controller and ESP32 backend.*
+
+- [ ] **Dual Glove Support**
+    - **Description:** System must handle input from two separate gyro sensors.
+- [ ] **ESP32 API / Auth**
+    - **Goal:** Move authentication logic to the ESP32.
+- [ ] **MDNS Capture Fix**
+    - **Problem:** Connecting to `brainiac.local` can be flaky.
+
+## 3. Patient Side Improvements
+*Enhancing the user experience for the patient specifically.*
+
+- [x] **Profile UI**
+    - **Status:** `patient/profile/profile-index.html` created with Stats Grid and Avatar.
+- [x] **Settings & Accessibility**
+    - **Status:** Global Scaling Engine implemented (`settings.js` + `global.css`).
+- [ ] **Progression System**
+    - **Gating:** Lock higher level games until XP threshold reached.
+- [x] **Game Tutorial**
+    - **Status:** "Attract Mode" implemented in Honey Bee (auto-plays background when idle).
+
+## 4. Physical Therapy Data Gathering
+*New metrics to track specific rehabilitation movements.*
+
+- [ ] **Horizontal / Vertical Movement Tracking**
+- [ ] **Time/Duration Metrics**
+    - Track endurance (time spent active vs idle).
+
+## 5. Game Concepts & Status
+
+- [x] **Honey Bee (Vertical/Flexion):**
+    - **Status:** Playable. Logic for "Go Down" (Collect) and "Go Up" (Return) implemented.
+    - **Needs:** Integration with physical Gyro data (currently mouse-driven).
+- [ ] **Raining Cats & Dogs:**
+    - **Status:** Assets uploaded. HTML/JS skeleton exists but is empty.
+- [ ] **Cookout:**
+    - **Status:** Skeleton exists.
+- [ ] **Point & Click:**
+    - **Status:** Skeleton exists.
+
+## 6. Sound
+- [ ] Background sound loop implementation.
+- [ ] Sound effect triggers (Success/Fail) in games.
