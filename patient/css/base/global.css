@@ -1,40 +1,51 @@
-/* [2026-01-26 01:25 pm - batch 1.5.0] */
+/* [2026-01-26 11:45 pm - batch 1.23.0] */
 /* patient/css/base/global.css */
 
 :root {
     /* --- COZY GAME PALETTE --- */
-    /* Backgrounds */
-    --bg-app: #FDF6E3;        /* Warm Cream - Easy on eyes */
-    --bg-card: #FFFFFF;       /* Pure White */
-    --bg-panel: #EEE8D5;      /* Darker Cream for contrast */
+    --bg-app: #FDF6E3;
+    --bg-card: #FFFFFF;
+    --bg-panel: #EEE8D5;
 
-    /* Typography */
-    --text-dark: #586E75;     /* Soft Navy/Grey - High readability, no harsh black */
-    --text-dim: #93A1A1;      /* Muted text */
-    --text-light: #FDF6E3;    /* Text on colored buttons */
+    --text-dark: #586E75;
+    --text-dim: #93A1A1;
+    --text-light: #FDF6E3;
 
-    /* Game Accents (Pastels) */
-    --accent-blue: #89CFF0;   /* Baby Blue (Profile) */
-    --accent-blue-dark: #5DA5D0;
-    
-    --accent-green: #A7E4A7;  /* Mint Green (Success/Go) */
+    --accent-blue: #89CFF0;
+    --accent-green: #A7E4A7;
     --accent-green-dark: #7CC07C;
-
-    --accent-yellow: #FFF59D; /* Custard (Warning/Action) */
+    --accent-yellow: #FFF59D;
     --accent-yellow-dark: #E6D865;
-
-    --accent-red: #FFAB91;    /* Salmon (Alert/Badge) */
+    --accent-red: #FFAB91;
     --accent-red-dark: #E68A70;
+    --accent-grey: #E0E0E0;
 
-    --accent-grey: #E0E0E0;   /* Neutral Buttons */
-    --accent-grey-dark: #BDBDBD;
-
-    /* UI Effects */
-    --shadow-soft: 0 8px 0 rgba(0,0,0,0.05); /* "Chunky" shadow for depth */
+    --shadow-soft: 0 8px 0 rgba(0,0,0,0.05);
     --shadow-card: 0 4px 12px rgba(88, 110, 117, 0.1);
+    
     --border-radius-lg: 25px;
     --border-radius-md: 16px;
     --border-radius-sm: 12px;
+
+    /* --- UNIFORM SCALING ENGINE --- */
+    /* 1. Original "Default" Values (The 1.0 Baseline) */
+    --base-text-size: 16px;
+    --base-btn-padding: 1rem;
+    --base-panel-space: 24px;
+
+    /* 2. Single Master Scale (Default 1.0) */
+    --app-scale: 1.0;
+
+    /* 3. Computed Variables (Used by all layout files) */
+    /* Everything is multiplied by the single --app-scale */
+    --ui-text-size: calc(var(--base-text-size) * var(--app-scale));
+    
+    /* Buttons scale padding and font relative to the multiplier */
+    --ui-btn-size: calc(var(--base-btn-padding) * var(--app-scale)); 
+    --ui-btn-font: calc(var(--base-text-size) * var(--app-scale));
+
+    /* Panel spacing scales gaps and padding */
+    --ui-panel-space: calc(var(--base-panel-space) * var(--app-scale)); 
 }
 
 * {
@@ -44,24 +55,26 @@
 }
 
 body {
-    font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif; /* Rounded, friendly font recommended */
+    font-family: 'Quicksand', 'Segoe UI', system-ui, sans-serif;
     background-color: var(--bg-app);
     color: var(--text-dark);
     height: 100vh;
-    padding: 1.5rem;
+    padding: var(--ui-panel-space); 
     overflow: hidden;
+    
+    /* Global Font Size */
+    font-size: var(--ui-text-size);
 }
 
 /* Base Components */
 .card {
     background-color: var(--bg-card);
     border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    padding: var(--ui-panel-space); 
     box-shadow: var(--shadow-card);
-    border: 2px solid rgba(0,0,0,0.03); /* Subtle border definition */
+    border: 2px solid rgba(0,0,0,0.03);
 }
 
-/* Button Reset & Game Feel */
 button {
     border: none;
     cursor: pointer;
@@ -71,8 +84,30 @@ button {
     user-select: none;
 }
 
-/* "Clicky" Effect for all buttons */
 button:active {
     transform: translateY(2px) scale(0.98);
     filter: brightness(0.95);
+}
+
+/* Helper for "Back" buttons in sub-pages */
+.nav-back-container {
+    margin-bottom: var(--ui-panel-space);
+}
+
+.back-link {
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: calc(var(--ui-text-size) * 1.2);
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-card);
+    border-radius: 50px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s;
+}
+.back-link:hover {
+    transform: translateX(-5px);
 }

@@ -72,3 +72,11 @@
 - [ ] doremi game in tiktok but wit harm
 - extension
 - [ ] hole and ball game, push to increase ball size to fill the hole
+      
+## 7.  Sound
+- [ ] background sound
+- [ ] sound effect buttons
+- [ ] voice instructions
+
+## 8. Game Options 
+- [ ] 3, 2, 1 start
