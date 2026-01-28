@@ -1,4 +1,3 @@
-<!-- [2026-01-26 11:45am - batch 1.0.0] -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,97 +39,81 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
 
-        .brand {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+        .brand { text-align: center; margin-bottom: 2rem; }
         .brand h1 {
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--color-accent);
-            margin-bottom: 0.5rem;
+            font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase;
+            color: var(--color-accent); margin-bottom: 0.5rem;
         }
-        .brand p {
-            font-size: 0.95rem;
-            color: var(--color-text-dim);
-        }
+        .brand p { font-size: 0.95rem; color: var(--color-text-dim); }
 
         /* --- FORM ELEMENTS --- */
         .form-group { margin-bottom: 1.5rem; }
         
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--color-text);
-        }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--color-text); }
 
         input {
-            width: 100%;
-            padding: 14px;
-            background: #0d1117;
-            border: 1px solid var(--color-border);
-            border-radius: 6px;
-            color: white;
-            font-size: 1.1rem;
+            width: 100%; padding: 14px; background: #0d1117;
+            border: 1px solid var(--color-border); border-radius: 6px;
+            color: white; font-size: 1.1rem;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input:focus {
-            outline: none;
-            border-color: var(--color-accent);
-            box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.2);
-        }
+        input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.2); }
 
         button {
-            width: 100%;
-            padding: 14px;
-            background: var(--color-accent);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            margin-top: 1rem;
+            width: 100%; padding: 14px; background: var(--color-accent);
+            color: white; border: none; border-radius: 6px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: opacity 0.2s; margin-top: 1rem;
         }
         button:hover { opacity: 0.9; }
 
         /* --- UTILS --- */
         .error-msg {
-            color: var(--color-error);
-            font-size: 0.95rem;
-            text-align: center;
-            margin-top: 1.5rem;
-            min-height: 1.2em;
-            font-weight: 500;
+            color: var(--color-error); font-size: 0.95rem; text-align: center;
+            margin-top: 1.5rem; min-height: 1.2em; font-weight: 500;
         }
 
         .hint {
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--color-border);
-            font-size: 0.85rem;
-            color: var(--color-text-dim);
-            text-align: center;
-            line-height: 1.6;
+            margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-border);
+            font-size: 0.85rem; color: var(--color-text-dim); text-align: center; line-height: 1.6;
         }
         .hint code {
-            background: rgba(110,118,129,0.4);
-            padding: 2px 5px;
-            border-radius: 4px;
-            color: white;
-            font-family: monospace;
+            background: rgba(110,118,129,0.4); padding: 2px 5px;
+            border-radius: 4px; color: white; font-family: monospace;
+        }
+
+        /* --- DEBUG CONSOLE (Visual) --- */
+        #debug-console {
+            position: fixed; top: 0; left: 0; width: 300px; height: 100vh;
+            background: rgba(0,0,0,0.8); color: lime; font-family: monospace;
+            font-size: 12px; padding: 10px; overflow-y: auto; z-index: 10000;
+            pointer-events: none; /* Let clicks pass through */
+        }
+        
+        /* --- MOUSE CSS (EMBEDDED) --- */
+        #pseudo-cursor {
+            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
+            z-index: 9999; pointer-events: none;
+            will-change: transform; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center;
+        }
+        #pseudo-cursor .cursor-pointer {
+            width: 15px; height: 15px; background-color: #2f81f7;
+            border-radius: 50%; box-shadow: 0 0 10px rgba(47, 129, 247, 0.5);
+            border: 2px solid white;
+        }
+        #pseudo-cursor.clicking .cursor-pointer {
+            background-color: #FFD700; transform: scale(0.8);
         }
     </style>
 </head>
 <body>
 
+    <div id="debug-console">DEBUG LOG:<br></div>
+
     <div class="login-container">
         <div class="brand">
-            <h1> Test Lorem Ipsum</h1>
+            <h1>Test Lorem Ipsum</h1>
             <p>Lorem Ipsum</p>
         </div>
 
@@ -146,7 +129,6 @@
             </div>
 
             <button type="submit">Sign In</button>
-
             <div id="errorDisplay" class="error-msg"></div>
         </form>
 
@@ -158,41 +140,44 @@
     </div>
 
     <script>
+        // --- LOGGER UTILS ---
+        function log(msg, data = "") {
+            const timestamp = new Date().toLocaleTimeString();
+            const logLine = `[${timestamp}] ${msg} ${data ? JSON.stringify(data) : ''}`;
+            
+            console.log(logLine); // To Browser Console
+            
+            // To Visual Debugger
+            const debugEl = document.getElementById('debug-console');
+            if(debugEl) {
+                debugEl.innerHTML += `<div>${logLine}</div>`;
+                debugEl.scrollTop = debugEl.scrollHeight;
+            }
+        }
+
+        // --- LOGIN LOGIC ---
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value;
             const errorEl = document.getElementById('errorDisplay');
 
-            // 1. HARDCODED MOCK AUTH
-            // This isolates the logic from backend dependencies for structural testing.
-            
             if (user === 'patient' && pass === '123') {
-                // SUCCESS: Patient Role
                 saveSession(user, 'patient');
-                // DIRECTS TO: Braniac 2/patient/patient-index.html
                 window.location.href = 'patient/patient-index.html';
             } 
             else if (user === 'pt' && pass === 'admin') {
-                // SUCCESS: Therapist Role
                 saveSession(user, 'therapist');
-                // DIRECTS TO: Braniac 2/pt/pt-index.html
                 window.location.href = 'pt/pt-index.html';
             } 
             else {
-                // FAILURE
                 errorEl.textContent = "Invalid credentials. Please try again.";
                 shakeForm();
             }
         });
 
         function saveSession(username, role) {
-            const session = {
-                user: username,
-                role: role,
-                loginTime: Date.now()
-            };
+            const session = { user: username, role: role, loginTime: Date.now() };
             localStorage.setItem('brainiac_session', JSON.stringify(session));
         }
 
@@ -203,7 +188,108 @@
             setTimeout(() => { container.style.transform = 'translateX(10px)'; }, 200);
             setTimeout(() => { container.style.transform = 'translateX(0)'; }, 300);
         }
+
+        // --- EMBEDDED MOUSE.JS (DEBUG VERSION) ---
+        log("[INIT] Starting Embedded Mouse Script...");
+
+        document.addEventListener('DOMContentLoaded', () => {
+            log("[INIT] DOM Loaded. Creating Cursor...");
+
+            // 1. Create UI
+            const cursor = document.createElement('div');
+            cursor.id = 'pseudo-cursor';
+            cursor.innerHTML = '<div class="cursor-pointer"></div>';
+            document.body.appendChild(cursor);
+            log("[INIT] Cursor appended to body.");
+
+            // 2. State
+            let posX = window.innerWidth / 2;
+            let posY = window.innerHeight / 2;
+            
+            // 3. Connect WebSocket
+            let wsHost = window.location.hostname;
+            if (!wsHost) {
+                log("[WARN] No hostname found (file://?). Defaulting to 192.168.4.1");
+                wsHost = "192.168.4.1";
+            }
+            
+            const wsUrl = `ws://${wsHost}/ws`;
+            log(`[WS] Attempting connect to: ${wsUrl}`);
+
+            let socket;
+            try {
+                socket = new WebSocket(wsUrl);
+            } catch (e) {
+                log("[CRITICAL] WebSocket Constructor Failed:", e);
+            }
+
+            if (socket) {
+                socket.onopen = () => {
+                    log("[WS] Connection OPEN! Waiting for data...");
+                    // Visual confirm
+                    cursor.querySelector('.cursor-pointer').style.backgroundColor = "#00FF00"; 
+                };
+
+                socket.onerror = (e) => {
+                    log("[WS] Error:", e);
+                };
+
+                socket.onclose = (e) => {
+                    log(`[WS] Closed. Code: ${e.code}, Reason: ${e.reason}`);
+                };
+
+                let packetCount = 0;
+
+                socket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        // Log first 10 packets only to avoid spam
+                        if (packetCount < 10) {
+                            log("[RX] Data:", data);
+                            packetCount++;
+                        }
+
+                        // VALIDATE KEYS
+                        if (data.x === undefined || data.y === undefined) {
+                            log("[ERR] Bad Data Packet. Missing x/y.");
+                            return;
+                        }
+
+                        // MOVE LOGIC
+                        posX += data.x * 3.5; 
+                        posY += data.z * 3.5; 
+
+                        // Clamp
+                        posX = Math.max(0, Math.min(window.innerWidth, posX));
+                        posY = Math.max(0, Math.min(window.innerHeight, posY));
+
+                        // Apply
+                        cursor.style.left = `${posX}px`;
+                        cursor.style.top = `${posY}px`;
+
+                        // CLICK LOGIC
+                        if (data.b1 === 1) {
+                            cursor.classList.add('clicking');
+                            // Actually click element
+                            cursor.style.visibility = 'hidden';
+                            let el = document.elementFromPoint(posX, posY);
+                            cursor.style.visibility = 'visible';
+                            if(el && !el.disabled) {
+                                log("[ACTION] Clicking element:", el.tagName);
+                                el.click();
+                                if(el.tagName === 'INPUT') el.focus();
+                            }
+                        } else {
+                            cursor.classList.remove('clicking');
+                        }
+
+                    } catch (err) {
+                        log("[ERR] Processing Message:", err);
+                    }
+                };
+            }
+        });
     </script>
-    <script src="patient/js/base/mouse.js"></script>
 </body>
 </html>
