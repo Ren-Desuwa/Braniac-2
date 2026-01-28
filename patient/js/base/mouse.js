@@ -1,7 +1,13 @@
+/* [2026-01-30 - batch 3.1.0] */
 /* patient/js/base/mouse.js */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Setup the Cursor Element
+    
+    // --- 1. SETUP CURSOR UI ---
+    // Remove existing if any (prevents duplicates)
+    const oldCursor = document.getElementById('pseudo-cursor');
+    if (oldCursor) oldCursor.remove();
+
     const cursor = document.createElement('div');
     cursor.id = 'pseudo-cursor';
     cursor.innerHTML = `
@@ -10,87 +16,95 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     document.body.appendChild(cursor);
 
+    // --- 2. STATE ---
     let posX = window.innerWidth / 2;
     let posY = window.innerHeight / 2;
-    let dwellTimer = null;
-    let lastHoveredElement = null;
+    
+    let isPressed = false;      // Track button state to prevent "turbo clicking"
+    let lastClickTime = 0;      // Debounce timer
 
-    // --- WEBSOCKET CONNECTION ---
-    // Connect to the ESP32 WebSocket stream
+    // --- 3. CONNECT ---
     const socket = new WebSocket(`ws://${window.location.hostname}/ws`);
 
+    socket.onopen = () => console.log("[MOUSE] Connected to ESP32 Input Stream");
+    
     socket.onmessage = (event) => {
+        // DATA FORMAT: {"x": 12.5, "z": -5.0, "b1": 1}
         const data = JSON.parse(event.data);
         
-        // Map Gyro X/Z to Screen X/Y
-        // Sensitivity multipliers may need adjustment based on physical testing
-        posX += data.x * 2.5; 
-        posY += data.z * 2.5;
+        // A. MOVEMENT (Inverted/Scaled for screen mapping)
+        // Sensitivity: 3.5 (Adjust this number if it feels too slow/fast)
+        posX += data.x * 3.5; 
+        posY += data.z * 3.5; // Use data.y if your gyro orientation is flat
 
-        // Clamp to screen bounds
+        // Clamp to screen edges
         posX = Math.max(0, Math.min(window.innerWidth, posX));
         posY = Math.max(0, Math.min(window.innerHeight, posY));
 
-        updateCursorPosition();
-    };
-
-    function updateCursorPosition() {
+        // Update Visuals
         cursor.style.left = `${posX}px`;
         cursor.style.top = `${posY}px`;
 
-        // Check what is under the pseudo-cursor
-        const elementAtPoint = document.elementFromPoint(posX, posY);
-        handleDwellLogic(elementAtPoint);
-    }
-
-    // --- DWELL & CLICK LOGIC ---
-    function handleDwellLogic(el) {
-        // Only trigger dwell on "clickable" elements
-        const isClickable = el && (
-            el.tagName === 'BUTTON' || 
-            el.tagName === 'A' || 
-            el.classList.contains('game-card') ||
-            window.getComputedStyle(el).cursor === 'pointer'
-        );
-
-        if (isClickable) {
-            if (lastHoveredElement !== el) {
-                resetDwell();
-                lastHoveredElement = el;
-                cursor.classList.add('dwelling');
-                
-                // Start 5 second timer
-                dwellTimer = setTimeout(() => {
-                    executeClick(el);
-                }, 5000);
+        // B. CLICK LOGIC (Physical Button "b1")
+        if (data.b1 === 1) {
+            if (!isPressed) {
+                // Button was JUST pressed (Rising Edge)
+                performClick(posX, posY);
+                isPressed = true;
+                cursor.classList.add('clicking'); // Visual feedback
             }
         } else {
-            resetDwell();
+            if (isPressed) {
+                // Button was released
+                isPressed = false;
+                cursor.classList.remove('clicking');
+            }
+        }
+    };
+
+    /**
+     * Finds the element under the virtual cursor and clicks it.
+     */
+    function performClick(x, y) {
+        // Debounce: Don't allow clicks faster than 300ms
+        const now = Date.now();
+        if (now - lastClickTime < 300) return;
+        lastClickTime = now;
+
+        // 1. Hide cursor temporarily so we can see what's UNDER it
+        cursor.style.visibility = 'hidden';
+        
+        // 2. Find the element
+        let el = document.elementFromPoint(x, y);
+        
+        // 3. Show cursor again
+        cursor.style.visibility = 'visible';
+
+        // 4. Trigger Click
+        if (el) {
+            console.log("[MOUSE] Clicking:", el.tagName, el.className);
+            
+            // Visual Feedback ripple (Optional)
+            createRipple(x, y);
+
+            // Dispatch events (Simulate a real mouse click sequence)
+            el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+            el.click(); 
+            
+            // Handle Focus for inputs
+            if (['INPUT', 'TEXTAREA', 'BUTTON'].includes(el.tagName)) {
+                el.focus();
+            }
         }
     }
 
-    function resetDwell() {
-        clearTimeout(dwellTimer);
-        cursor.classList.remove('dwelling');
-        lastHoveredElement = null;
+    function createRipple(x, y) {
+        const ripple = document.createElement('div');
+        ripple.className = 'click-ripple';
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 500);
     }
-
-    function executeClick(el) {
-        if (!el) return;
-        
-        // Visual feedback
-        el.style.transform = 'scale(0.95)';
-        setTimeout(() => el.style.transform = '', 100);
-
-        // Dispatch Click
-        el.click();
-        console.log("Pseudo-click executed on:", el);
-        resetDwell();
-    }
-
-    // Support for physical mouse clicks (Fallback/Assistance)
-    document.addEventListener('mousedown', (e) => {
-        const el = document.elementFromPoint(posX, posY);
-        if (el) executeClick(el);
-    });
 });
