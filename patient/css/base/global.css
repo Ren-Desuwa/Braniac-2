@@ -1,5 +1,6 @@
 /* [2026-01-26 11:45 pm - batch 1.23.0] */
 /* patient/css/base/global.css */
+@import url('mouse.css');
 
 :root {
     /* --- COZY GAME PALETTE --- */
