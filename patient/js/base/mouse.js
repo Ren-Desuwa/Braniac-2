@@ -107,4 +107,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(ripple);
         setTimeout(() => ripple.remove(), 500);
     }
-});>
+});
