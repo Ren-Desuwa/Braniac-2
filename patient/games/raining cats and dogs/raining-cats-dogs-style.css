@@ -1,8 +1,8 @@
-/* [2026-01-28 11:15 pm - batch 1.68.0] */
+/* [2026-01-29 02:30 pm - batch 1.72.0] */
 /* patient/games/raining cats and dogs/raining-cats-dogs-style.css */
 
 body {
-    background: #0d1117;
+    background: #0066ff;
     overflow: hidden;
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
@@ -19,37 +19,22 @@ body {
     background-color: #222;
 }
 
-/* --- BACKGROUND --- */
-#game-bg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    max-width: 60vh; 
-    background-image: url('assets/images/night-city-vertical.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    z-index: 0;
-    box-shadow: 0 0 50px rgba(0,0,0,0.8);
-}
-
+/* Canvas is the primary visual element now, just like Honey Bee */
 canvas {
     position: relative;
     display: block;
     width: 100%;
     height: 100%;
-    max-width: 60vh;
+    /* Maintain vertical game aspect ratio constraint */
+    max-width: 60vh; 
     object-fit: contain;
-    z-index: 2;
+    z-index: 1;
 }
 
 /* --- BOTTOM GUIDE TRACK --- */
 #guide-bottom {
     position: absolute;
-    bottom: 20px; /* Sits low under the play area */
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 85%;
@@ -72,7 +57,6 @@ canvas {
     transition: border-color 0.3s;
 }
 
-/* --- TEXT IN MIDDLE --- */
 #guide-text {
     font-size: 2rem;
     font-weight: 900;
@@ -84,11 +68,7 @@ canvas {
     text-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-/* --- ARROWS --- */
-.arrow-group {
-    display: flex;
-    gap: 10px;
-}
+.arrow-group { display: flex; gap: 10px; }
 
 .track-arrow {
     font-size: 2.5rem;
@@ -97,58 +77,29 @@ canvas {
     transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55), color 0.3s;
 }
 
-/* --- STATES --- */
+/* STATES */
+.guide-track.state-push { border-color: rgba(76, 175, 80, 0.5); }
+.guide-track.state-push #guide-text { color: #4CAF50; }
+.guide-track.state-push .track-arrow { transform: rotate(-90deg); color: #4CAF50; }
 
-/* PUSH STATE (Green, Up arrow) */
-.guide-track.state-push {
-    border-color: rgba(76, 175, 80, 0.5);
-}
-.guide-track.state-push #guide-text {
-    color: #4CAF50;
-}
-.guide-track.state-push .track-arrow {
-    transform: rotate(-90deg); /* Point UP */
-    color: #4CAF50;
-}
+.guide-track.state-pull { border-color: rgba(255, 87, 34, 0.5); }
+.guide-track.state-pull #guide-text { color: #FF5722; }
+.guide-track.state-pull .track-arrow { transform: rotate(90deg); color: #FF5722; }
 
-/* PULL STATE (Orange, Down arrow) */
-.guide-track.state-pull {
-    border-color: rgba(255, 87, 34, 0.5);
-}
-.guide-track.state-pull #guide-text {
-    color: #FF5722;
-}
-.guide-track.state-pull .track-arrow {
-    transform: rotate(90deg); /* Point DOWN */
-    color: #FF5722;
-}
-
-/* --- UI OVERLAY --- */
+/* OVERLAY */
 .overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    z-index: 20;
-    text-align: center;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: white; z-index: 20; text-align: center;
 }
-
 .overlay h1 { font-size: 3rem; color: #ffd700; margin-bottom: 1rem; }
 .overlay p { font-size: 1.4rem; line-height: 1.6; color: #ccc; margin-bottom: 3rem; }
 
 .btn-primary {
-    padding: 15px 50px;
-    font-size: 1.5rem;
-    font-weight: bold;
-    background: #2f81f7;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: transform 0.2s;
+    padding: 15px 50px; font-size: 1.5rem; font-weight: bold;
+    background: #2f81f7; color: white; border: none; border-radius: 50px;
+    cursor: pointer; transition: transform 0.2s;
 }
 .btn-primary:hover { transform: scale(1.05); }
