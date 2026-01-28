@@ -323,11 +323,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endSession() {
         isPlaying = false;
+        
+        // [DB] 1. Capture Config
+        const configStr = `rate:${GAME_CONFIG.spawnRate}|flowers:${GAME_CONFIG.maxFlowers}`;
+        
+        // [DB] 2. Save to SD Card
+        if (window.BrainiacDB) {
+            window.BrainiacDB.logGame('honey-bee', score, currentReps, currentSet, configStr);
+        } else {
+            console.warn("BrainiacDB not found. Is db.js loaded?");
+        }
+
+        // 3. Show Game Over Screen
         screenTitle.innerText = "Session Complete!";
-        screenDesc.innerHTML = `Great work!<br>Total Score: <strong>${score}</strong>`;
+        screenDesc.innerHTML = `Great work!<br>Total Score: <strong>${score}</strong><br><small>Saved to History</small>`;
         startBtn.innerText = "Start New Session";
         startScreen.style.display = 'flex';
-        guideTrack.style.display = 'none'; // Hide track
+        guideTrack.style.display = 'none'; 
     }
 
     resize();
