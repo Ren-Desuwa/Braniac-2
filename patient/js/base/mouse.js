@@ -1,11 +1,9 @@
-/* [2026-01-30 - MULTI-CURSOR FINAL] */
-/* Supports: Arm (Green), Glove (Blue) */
-/* Features: Magnet, Dwell, Physical Click, Debounce, Animation Reset */
+/* [2026-01-30 - MULTI-CURSOR FINAL - FIXED] */
+/* Fixes: Event Dispatching for Games, Delta Calculation */
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[MOUSE] Multi-Cursor System Initialized.");
 
-    // --- CONFIGURATION ---
     const DEVICE_CONFIG = {
         "Arm":   { color: "#00FF00", label: "ARM" },   // Green
         "Glove": { color: "#0055FF", label: "GLOVE" }  // Blue
@@ -13,22 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const DWELL_TIME = 1500;
     const MAGNET_DIST = 40;
-    const CLICK_DEBOUNCE = 300; // [RESTORED] Prevent accidental double clicks
+    const CLICK_DEBOUNCE = 300;
 
-    // --- CLASS: REMOTE CURSOR ---
     class RemoteCursor {
         constructor(deviceName) {
             this.name = deviceName;
             this.x = window.innerWidth / 2;
             this.y = window.innerHeight / 2;
             
-            // State
+            // [FIX 1] Track previous data to calculate Delta
+            this.lastDataX = null;
+            this.lastDataY = null;
+
             this.isPressed = false;
-            this.lastClickTime = 0; // [RESTORED]
+            this.lastClickTime = 0;
             this.dwellTimer = null;
             this.dwellTarget = null;
             
-            // Create UI Element
             this.element = document.createElement('div');
             this.element.className = 'remote-cursor'; 
             this.element.id = `cursor-${deviceName}`;
@@ -46,26 +45,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             
-            // Styles
             this.element.style.position = 'fixed';
             this.element.style.zIndex = '9999';
             this.element.style.pointerEvents = 'none'; 
-            this.element.style.transition = 'top 0.1s linear, left 0.1s linear';
+            this.element.style.transition = 'top 0.05s linear, left 0.05s linear'; // Faster transition
             this.element.style.left = this.x + 'px';
             this.element.style.top = this.y + 'px';
 
             document.body.appendChild(this.element);
-            console.log(`[MOUSE] Created cursor for ${deviceName}`);
         }
 
-        update(dx, dy) {
-            // 1. Movement
-            this.x += dx * 3.5;
-            this.y += dy * 3.5;
+        update(rawX, rawY) {
+            // [FIX 1] Initialize previous data if first frame
+            if (this.lastDataX === null) {
+                this.lastDataX = rawX;
+                this.lastDataY = rawY;
+                return { target: null, renderX: this.x, renderY: this.y };
+            }
+
+            // [FIX 1] Calculate Change (Delta) since last packet
+            const deltaX = rawX - this.lastDataX;
+            const deltaY = rawY - this.lastDataY;
+            
+            this.lastDataX = rawX;
+            this.lastDataY = rawY;
+
+            // Apply Delta to Screen Position
+            // Multiplier 15 matches your config.html feel
+            this.x += deltaX * 15; 
+            this.y += deltaY * 15;
+
+            // Clamp to Screen
             this.x = Math.max(0, Math.min(window.innerWidth, this.x));
             this.y = Math.max(0, Math.min(window.innerHeight, this.y));
 
-            // 2. Magnet Logic
+            // [FIX 2] DISPATCH EVENT FOR GAMES
+            // This tricks the browser into thinking a real mouse moved
+            this.dispatchGlobalEvent(this.x, this.y);
+
+            // Magnet Logic
             let renderX = this.x;
             let renderY = this.y;
             const target = this.findInteractiveElement(this.x, this.y);
@@ -91,42 +109,82 @@ document.addEventListener('DOMContentLoaded', () => {
             return { target, renderX, renderY };
         }
 
+        // [FIX 2 Helper]
+        dispatchGlobalEvent(x, y) {
+            // Dispatch standard mousemove for games
+            const evt = new MouseEvent('mousemove', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: x,
+                clientY: y
+            });
+            document.dispatchEvent(evt);
+
+            // Also dispatch to iframes (Launcher logic)
+            const iframe = document.querySelector('iframe');
+            if (iframe && iframe.contentWindow) {
+                const iframeRect = iframe.getBoundingClientRect();
+                // Adjust coordinates relative to iframe
+                const iframeEvt = new MouseEvent('mousemove', {
+                    view: iframe.contentWindow,
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: x - iframeRect.left,
+                    clientY: y - iframeRect.top
+                });
+                iframe.contentDocument.dispatchEvent(iframeEvt);
+            }
+        }
+
         handleButtons(btn1, target, x, y) {
             if (btn1 === 1) {
-                // Physical Click
                 if (!this.isPressed) {
-                    this.click(x, y); // Execute click
+                    this.click(x, y); 
                     this.isPressed = true;
                     this.element.classList.add('clicking');
                     this.resetDwell(); 
                 }
             } else {
-                // Released
                 if (this.isPressed) {
                     this.isPressed = false;
                     this.element.classList.remove('clicking');
                 }
-                // Dwell Logic (Only when NOT clicking)
                 this.handleDwell(target, x, y);
             }
         }
 
         click(x, y) {
-            // [RESTORED] Debounce Check
             const now = Date.now();
             if (now - this.lastClickTime < CLICK_DEBOUNCE) return;
             this.lastClickTime = now;
 
-            console.log(`[${this.name}] CLICK at ${x}, ${y}`);
-            
+            // Visual Ripple
+            this.createRipple(x, y);
+
+            // Temporarily hide cursor to click element underneath
             this.element.style.visibility = 'hidden';
             let el = document.elementFromPoint(x, y);
+            
+            // Handle Iframe Clicks
+            const iframe = document.querySelector('iframe');
+            if (el === iframe) {
+                const iframeRect = iframe.getBoundingClientRect();
+                el = iframe.contentDocument.elementFromPoint(x - iframeRect.left, y - iframeRect.top);
+            }
+
             this.element.style.visibility = 'visible';
 
             if (el) {
-                this.createRipple(x, y);
+                console.log(`[${this.name}] Clicked:`, el);
                 el.click();
                 if (['INPUT', 'TEXTAREA'].includes(el.tagName)) el.focus();
+                
+                // Dispatch mousedown/mouseup for games that use it
+                const down = new MouseEvent('mousedown', { bubbles: true, clientX: x, clientY: y });
+                const up = new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y });
+                el.dispatchEvent(down);
+                el.dispatchEvent(up);
             }
         }
 
@@ -153,11 +211,10 @@ document.addEventListener('DOMContentLoaded', () => {
             this.dwellTarget = null;
             this.element.classList.remove('dwelling');
             
-            // [RESTORED] Force Animation Restart
             const ring = this.element.querySelector('.dwell-ring');
             if(ring) {
                 ring.style.animation = 'none';
-                ring.offsetHeight; /* Trigger Reflow */
+                ring.offsetHeight; 
                 ring.style.animation = null; 
             }
         }
@@ -166,6 +223,18 @@ document.addEventListener('DOMContentLoaded', () => {
             this.element.style.visibility = 'hidden';
             let el = document.elementFromPoint(x, y);
             this.element.style.visibility = 'visible';
+
+            // Check if we are over an iframe
+            if (el && el.tagName === 'IFRAME') {
+                try {
+                    const iframe = el;
+                    const iframeRect = iframe.getBoundingClientRect();
+                    const innerEl = iframe.contentDocument.elementFromPoint(x - iframeRect.left, y - iframeRect.top);
+                    if (innerEl && (innerEl.tagName === 'BUTTON' || innerEl.onclick)) {
+                        return iframe; // Return iframe as the target to trigger Magnet/Dwell
+                    }
+                } catch(e) { /* CORS restriction if different origin */ }
+            }
 
             while (el && el !== document.body) {
                 if (['BUTTON', 'A', 'INPUT'].includes(el.tagName) || 
@@ -187,17 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- MAIN LOGIC ---
+    // --- WEBSOCKET CONNECTION ---
     const cursors = {}; 
-    const wsHost = window.location.hostname ? window.location.hostname : "localhost";
+    const wsHost = window.location.hostname ? window.location.hostname : "192.168.4.1";
     const wsUrl = `ws://${wsHost}/ws`;
+    
+    console.log(`[MOUSE] Connecting to ${wsUrl}...`);
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => console.log("[MOUSE] Connected to Hub.");
+    socket.onerror = (e) => console.log("[MOUSE] WebSocket Error:", e);
     
     socket.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            
+            // Sanity check data
             if (!data.device || isNaN(data.x) || isNaN(data.z)) return;
 
             if (!cursors[data.device]) {
@@ -205,13 +279,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             const cursor = cursors[data.device];
+            
+            // Use X and Z (Yaw) for 2D movement
             const state = cursor.update(data.x, data.z);
             
-            // Pass 'b1' to handle clicks
             cursor.handleButtons(data.b1, state.target, state.renderX, state.renderY);
 
         } catch (e) {
-            console.error(e);
+            // Ignore malformed JSON
         }
     };
 });

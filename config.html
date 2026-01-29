@@ -3,309 +3,297 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainiac Dual Config</title>
+    <title>Brainiac Matrix Console</title>
     <style>
-        :root { --bg:#121212; --panel:#1e1e1e; --accent:#00e5ff; --text:#ddd; --warn:#ff9800; }
+        :root { 
+            --bg:#121212; --panel:#1e1e1e; --text:#ddd; 
+            --arm-color:#00E676; --glove-color:#00e5ff; 
+            --add:#00E676; --sub:#FF3333;
+        }
         body { 
-            background: var(--bg); color: var(--text); font-family: monospace; 
+            background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; 
             margin: 0; padding: 20px; display: grid; gap: 20px;
-            grid-template-columns: 340px 1fr; height: 100vh; overflow: hidden;
+            grid-template-columns: 460px 1fr; height: 100vh; overflow: hidden;
         }
 
         /* SIDEBAR */
         .sidebar { background: var(--panel); padding: 20px; border-right: 1px solid #333; display:flex; flex-direction:column; gap:15px; overflow-y:auto; }
-        .group { background: #252525; padding: 15px; border-radius: 8px; border: 1px solid #333; }
-        h3 { color: var(--accent); margin: 0 0 10px 0; border-bottom: 1px solid #444; padding-bottom: 5px; font-size:14px; text-transform:uppercase; }
+        .group { background: #252525; padding: 15px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; }
+        h3 { margin: 0 0 10px 0; border-bottom: 1px solid #444; padding-bottom: 5px; font-size:12px; text-transform:uppercase; letter-spacing:1px; display: flex; justify-content: space-between;}
         
-        .row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-        .val { color: #fff; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color:#888; }
+        .val { font-weight: bold; font-family: monospace; color: #fff; }
         
-        /* MIXER BUTTONS */
+        /* MATRIX MIXER */
         .map-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 10px; }
         .map-btn { 
-            background: #333; border: 1px solid #555; color: #666; padding: 8px 5px; 
-            font-size: 11px; cursor: pointer; text-align: center; border-radius: 4px; transition: 0.1s; user-select: none;
+            background: #333; border: 1px solid #555; color: #666; padding: 8px 4px; 
+            font-size: 10px; cursor: pointer; text-align: center; border-radius: 4px; transition: 0.1s; user-select: none;
         }
-        /* Active State = Green/Accent */
-        .map-btn.active { background: rgba(0, 229, 255, 0.2); color: var(--accent); border-color: var(--accent); font-weight: bold; }
+        /* States */
+        .map-btn[data-state="1"] { background: var(--add); color: #000; font-weight: bold; border-color:var(--add); } /* ADD */
+        .map-btn[data-state="-1"] { background: var(--sub); color: #fff; font-weight: bold; border-color:var(--sub); } /* SUBTRACT */
         
-        input[type="range"] { width: 100%; margin: 5px 0 10px; accent-color: var(--accent); }
-        label { font-size: 11px; color: #888; display:block; margin-top:5px; }
+        input[type="range"] { width: 100%; margin: 5px 0 10px; accent-color: #888; }
+        label { font-size: 11px; color: #888; display:block; margin-top:5px; font-weight:bold; }
         
-        .btn-main { width: 100%; padding: 12px; background: #333; color: white; border: 1px solid #555; cursor: pointer; transition: 0.2s; font-weight:bold; }
-        .btn-main:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-main { width: 100%; padding: 12px; background: #333; color: white; border: 1px solid #555; cursor: pointer; transition: 0.2s; font-weight:bold; border-radius: 4px; }
+        .btn-main:hover { border-color: #fff; }
 
-        select.btn-main { text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-
-        /* LOG BOX */
-        #logs { flex: 1; background: #000; border: 1px solid #333; overflow-y: auto; padding: 10px; font-size: 10px; color: #0f0; font-family: 'Courier New', monospace; min-height: 100px; }
-
-        /* ARENA */
-        .arena { 
-            position: relative; background: #000; border: 2px dashed #444; 
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        #cursor {
+        .arena { position: relative; background: #000; border: 2px dashed #333; border-radius: 12px; overflow: hidden; }
+        .cursor {
             position: absolute; width: 20px; height: 20px;
-            background: rgba(0, 229, 255, 0.4); border: 2px solid var(--accent);
             border-radius: 50%; transform: translate(-50%, -50%);
-            box-shadow: 0 0 20px var(--accent);
-            transition: background 0.1s, border-color 0.1s;
+            transition: width 0.1s, height 0.1s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: bold; color: black; z-index: 10;
         }
-        #cursor.click { background: #ff0055; border-color: #ff0055; box-shadow: 0 0 20px #ff0055; }
-        
-        #target-label {
-            position: absolute; top: 10px; left: 10px; 
-            background: #222; color: #fff; padding: 5px 10px; 
-            border-radius: 4px; font-size: 12px; border: 1px solid #444;
-        }
+        .cursor.click { width: 15px; height: 15px; border-width: 4px; }
+        #cursor-arm { background: var(--arm-color); box-shadow: 0 0 15px var(--arm-color); border: 2px solid #fff; }
+        #cursor-glove { background: var(--glove-color); box-shadow: 0 0 15px var(--glove-color); border: 2px solid #fff; }
+        .status-badge { padding: 2px 6px; border-radius: 4px; font-size:10px; font-weight:bold; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="group" style="border-color: var(--accent);">
-            <h3>Target Device</h3>
-            <select id="device-select" class="btn-main" style="background:#000;">
-                <option value="Glove">Glove (ESP-NOW)</option>
-                <option value="Arm">Arm (Local Gyro)</option>
-            </select>
-        </div>
+        <button id="btn-save" class="btn-main" style="background:#444; border:none; margin-bottom:10px;">SAVE CONFIGURATION</button>
 
-        <div class="group">
-            <h3>Raw Data (<span id="dev-name">GLOVE</span>)</h3>
-            <div class="row"><span>GYRO X:</span> <span id="raw-x" class="val">0.00</span></div>
-            <div class="row"><span>GYRO Y:</span> <span id="raw-y" class="val">0.00</span></div>
-            <div class="row"><span>GYRO Z:</span> <span id="raw-z" class="val">0.00</span></div>
-            <div class="row"><span>BUTTON:</span> <span id="raw-btn" class="val">OFF</span></div>
-        </div>
+        <div class="group" style="border-left: 4px solid var(--arm-color);">
+            <h3 style="color:var(--arm-color)">ARM <span id="arm-status" class="status-badge" style="background:#333; color:#888">IDLE</span></h3>
+            <div class="row">
+                <span>GYRO: <span id="arm-x" class="val">0</span>, <span id="arm-y" class="val">0</span>, <span id="arm-z" class="val">0</span></span>
+                <span>BTN: <span id="arm-b1" class="val">0</span> / <span id="arm-b2" class="val">0</span></span>
+            </div>
+            <div class="row" style="margin-bottom:10px; border-bottom:1px dashed #444; padding-bottom:5px;">
+                <span>ACCEL: <span id="arm-lax" class="val">0</span>, <span id="arm-lay" class="val">0</span>, <span id="arm-laz" class="val">0</span></span>
+            </div>
 
-        <div class="group">
-            <h3>Axis Mapping</h3>
-            
-            <label>SCREEN X (Left/Right) driven by:</label>
+            <label>Screen X Source (Green=Add, Red=Sub)</label>
             <div class="map-grid">
-                <div class="map-btn" id="btn-x-x" onclick="toggleMap('x', 'x')">Gyro X</div>
-                <div class="map-btn" id="btn-x-y" onclick="toggleMap('x', 'y')">Gyro Y</div>
-                <div class="map-btn" id="btn-x-z" onclick="toggleMap('x', 'z')">Gyro Z</div>
+                <div class="map-btn" id="btn-x-x-arm" onclick="cycleMap('Arm', 'x', 'x')">GYRO X</div>
+                <div class="map-btn" id="btn-x-y-arm" onclick="cycleMap('Arm', 'x', 'y')">GYRO Y</div>
+                <div class="map-btn" id="btn-x-z-arm" onclick="cycleMap('Arm', 'x', 'z')">GYRO Z</div>
+                <div class="map-btn" id="btn-x-lax-arm" onclick="cycleMap('Arm', 'x', 'lax')">ACCEL X</div>
+                <div class="map-btn" id="btn-x-lay-arm" onclick="cycleMap('Arm', 'x', 'lay')">ACCEL Y</div>
+                <div class="map-btn" id="btn-x-laz-arm" onclick="cycleMap('Arm', 'x', 'laz')">ACCEL Z</div>
             </div>
 
-            <label>SCREEN Y (Up/Down) driven by:</label>
+            <label>Screen Y Source</label>
             <div class="map-grid">
-                <div class="map-btn" id="btn-y-x" onclick="toggleMap('y', 'x')">Gyro X</div>
-                <div class="map-btn" id="btn-y-y" onclick="toggleMap('y', 'y')">Gyro Y</div>
-                <div class="map-btn" id="btn-y-z" onclick="toggleMap('y', 'z')">Gyro Z</div>
+                <div class="map-btn" id="btn-y-x-arm" onclick="cycleMap('Arm', 'y', 'x')">GYRO X</div>
+                <div class="map-btn" id="btn-y-y-arm" onclick="cycleMap('Arm', 'y', 'y')">GYRO Y</div>
+                <div class="map-btn" id="btn-y-z-arm" onclick="cycleMap('Arm', 'y', 'z')">GYRO Z</div>
+                <div class="map-btn" id="btn-y-lax-arm" onclick="cycleMap('Arm', 'y', 'lax')">ACCEL X</div>
+                <div class="map-btn" id="btn-y-lay-arm" onclick="cycleMap('Arm', 'y', 'lay')">ACCEL Y</div>
+                <div class="map-btn" id="btn-y-laz-arm" onclick="cycleMap('Arm', 'y', 'laz')">ACCEL Z</div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <label><input type="checkbox" id="inv-x"> Invert X</label>
-                <label><input type="checkbox" id="inv-y"> Invert Y</label>
+            <label>Speed: <span id="lbl-s-arm">15</span></label>
+            <input type="range" min="1" max="100" value="15" id="rng-s-arm" oninput="updateSlider('Arm', this.value)">
+        </div>
+
+        <div class="group" style="border-left: 4px solid var(--glove-color);">
+            <h3 style="color:var(--glove-color)">GLOVE <span id="glove-status" class="status-badge" style="background:#333; color:#888">OFFLINE</span></h3>
+            <div class="row">
+                <span>GYRO: <span id="glove-x" class="val">0</span>, <span id="glove-y" class="val">0</span>, <span id="glove-z" class="val">0</span></span>
+                <span>BTN: <span id="glove-b1" class="val">0</span> / LINK: <span id="glove-b2" class="val">0</span></span>
             </div>
+            <div class="row" style="margin-bottom:10px; border-bottom:1px dashed #444; padding-bottom:5px;">
+                <span>ACCEL: <span id="glove-lax" class="val">0</span>, <span id="glove-lay" class="val">0</span>, <span id="glove-laz" class="val">0</span></span>
+            </div>
+
+            <label>Screen X Source</label>
+            <div class="map-grid">
+                <div class="map-btn" id="btn-x-x-glove" onclick="cycleMap('Glove', 'x', 'x')">GYRO X</div>
+                <div class="map-btn" id="btn-x-y-glove" onclick="cycleMap('Glove', 'x', 'y')">GYRO Y</div>
+                <div class="map-btn" id="btn-x-z-glove" onclick="cycleMap('Glove', 'x', 'z')">GYRO Z</div>
+                <div class="map-btn" id="btn-x-lax-glove" onclick="cycleMap('Glove', 'x', 'lax')">ACCEL X</div>
+                <div class="map-btn" id="btn-x-lay-glove" onclick="cycleMap('Glove', 'x', 'lay')">ACCEL Y</div>
+                <div class="map-btn" id="btn-x-laz-glove" onclick="cycleMap('Glove', 'x', 'laz')">ACCEL Z</div>
+            </div>
+
+            <label>Screen Y Source</label>
+            <div class="map-grid">
+                <div class="map-btn" id="btn-y-x-glove" onclick="cycleMap('Glove', 'y', 'x')">GYRO X</div>
+                <div class="map-btn" id="btn-y-y-glove" onclick="cycleMap('Glove', 'y', 'y')">GYRO Y</div>
+                <div class="map-btn" id="btn-y-z-glove" onclick="cycleMap('Glove', 'y', 'z')">GYRO Z</div>
+                <div class="map-btn" id="btn-y-lax-glove" onclick="cycleMap('Glove', 'y', 'lax')">ACCEL X</div>
+                <div class="map-btn" id="btn-y-lay-glove" onclick="cycleMap('Glove', 'y', 'lay')">ACCEL Y</div>
+                <div class="map-btn" id="btn-y-laz-glove" onclick="cycleMap('Glove', 'y', 'laz')">ACCEL Z</div>
+            </div>
+
+            <label>Speed: <span id="lbl-s-glove">15</span></label>
+            <input type="range" min="1" max="100" value="15" id="rng-s-glove" oninput="updateSlider('Glove', this.value)">
         </div>
 
-        <div class="group">
-            <h3>Sensitivity</h3>
-            <label>Speed X: <span id="lbl-sx">15</span></label>
-            <input type="range" min="1" max="100" value="15" id="rng-sx">
-            
-            <label>Speed Y: <span id="lbl-sy">15</span></label>
-            <input type="range" min="1" max="100" value="15" id="rng-sy">
-        </div>
-
-        <div id="logs">Connecting...</div>
     </div>
 
     <div class="arena" id="arena">
-        <div id="target-label">Testing: GLOVE</div>
-        <div id="cursor"></div>
+        <div id="cursor-arm" class="cursor">A</div>
+        <div id="cursor-glove" class="cursor">G</div>
     </div>
 
     <script>
-        // --- 1. DUAL CONFIGURATION STORE ---
-        // We store independent settings for both devices here.
-        const profiles = {
-            "Glove": {
-                mixX: { x: true, y: false, z: false },
-                mixY: { x: false, y: false, z: true },
-                invX: false, invY: false,
-                scaleX: 15, scaleY: 15
-            },
-            "Arm": {
-                mixX: { x: true, y: false, z: false },
-                mixY: { x: false, y: false, z: true },
-                invX: false, invY: false,
-                scaleX: 15, scaleY: 15
-            }
-        };
-
-        let currentDev = "Glove"; // Default Selection
-
-        // --- 2. UI SYNC ENGINE ---
-        // When we switch devices, we must reload the UI controls to match that device's profile.
-        function loadProfileToUI() {
-            const p = profiles[currentDev];
-
-            // Update Labels
-            document.getElementById('dev-name').innerText = currentDev.toUpperCase();
-            document.getElementById('target-label').innerText = "Testing: " + currentDev.toUpperCase();
-
-            // Update Buttons (Mixer)
-            updateBtnState('btn-x-x', p.mixX.x);
-            updateBtnState('btn-x-y', p.mixX.y);
-            updateBtnState('btn-x-z', p.mixX.z);
-
-            updateBtnState('btn-y-x', p.mixY.x);
-            updateBtnState('btn-y-y', p.mixY.y);
-            updateBtnState('btn-y-z', p.mixY.z);
-
-            // Update Checkboxes
-            document.getElementById('inv-x').checked = p.invX;
-            document.getElementById('inv-y').checked = p.invY;
-
-            // Update Sliders
-            document.getElementById('rng-sx').value = p.scaleX;
-            document.getElementById('lbl-sx').innerText = p.scaleX;
-            document.getElementById('rng-sy').value = p.scaleY;
-            document.getElementById('lbl-sy').innerText = p.scaleY;
-
-            log(`Switched config to ${currentDev}`);
+        // --- 1. ADVANCED MATRIX CONFIG ---
+        // We now store mixX/mixY as objects where keys are inputs (x,y,z,lax,lay,laz)
+        // and values are 0, 1, or -1.
+        
+        const KEYS = ['x','y','z','lax','lay','laz'];
+        
+        function createDefaultMix() {
+            let m = { mixX: {}, mixY: {}, scale: 15 };
+            KEYS.forEach(k => { m.mixX[k] = 0; m.mixY[k] = 0; });
+            return m;
         }
 
-        function updateBtnState(id, active) {
+        const defaultProfiles = { "Glove": createDefaultMix(), "Arm": createDefaultMix() };
+        // Defaults: Glove Z->Screen X, Glove Y->Screen Y
+        defaultProfiles.Glove.mixX.z = 1; 
+        defaultProfiles.Glove.mixY.y = 1;
+        // Defaults: Arm X->Screen X, Arm Z->Screen Y
+        defaultProfiles.Arm.mixX.x = 1; 
+        defaultProfiles.Arm.mixY.z = 1;
+
+        let profiles = JSON.parse(localStorage.getItem('brainiac_matrix_v2')) || defaultProfiles;
+
+        // --- 2. UI SYNC ---
+        function loadUI() {
+            ['Arm', 'Glove'].forEach(dev => {
+                const p = profiles[dev];
+                const suffix = dev.toLowerCase();
+
+                KEYS.forEach(axis => {
+                    setBtnState(dev, 'x', axis, p.mixX[axis]);
+                    setBtnState(dev, 'y', axis, p.mixY[axis]);
+                });
+
+                document.getElementById(`rng-s-${suffix}`).value = p.scale;
+                document.getElementById(`lbl-s-${suffix}`).innerText = p.scale;
+            });
+        }
+
+        function setBtnState(dev, screenAxis, inputAxis, val) {
+            const id = `btn-${screenAxis}-${inputAxis}-${dev.toLowerCase()}`;
             const el = document.getElementById(id);
-            if (active) el.classList.add('active');
-            else el.classList.remove('active');
+            if(el) el.setAttribute('data-state', val || 0);
         }
 
-        // --- 3. INPUT LISTENERS ---
-        // Whenever a user changes a setting, we save it to the CURRENT profile immediately.
-        
-        // Device Selector
-        document.getElementById('device-select').onchange = (e) => {
-            currentDev = e.target.value;
-            loadProfileToUI();
+        // --- 3. INPUT HANDLERS ---
+        window.cycleMap = (dev, screenAxis, inputAxis) => {
+            const p = profiles[dev];
+            const target = (screenAxis === 'x') ? p.mixX : p.mixY;
+            
+            // Cycle: 0 -> 1 -> -1 -> 0
+            if (!target[inputAxis]) target[inputAxis] = 1;
+            else if (target[inputAxis] === 1) target[inputAxis] = -1;
+            else target[inputAxis] = 0;
+
+            loadUI();
         };
 
-        // Mixer Toggles
-        window.toggleMap = (screenAxis, gyroAxis) => {
-            const p = profiles[currentDev];
-            if (screenAxis === 'x') p.mixX[gyroAxis] = !p.mixX[gyroAxis];
-            if (screenAxis === 'y') p.mixY[gyroAxis] = !p.mixY[gyroAxis];
-            loadProfileToUI(); // Refresh UI to show change
+        window.updateSlider = (dev, val) => {
+            profiles[dev].scale = parseInt(val);
+            document.getElementById(`lbl-s-${dev.toLowerCase()}`).innerText = val;
         };
 
-        // Checkboxes
-        document.getElementById('inv-x').onchange = (e) => profiles[currentDev].invX = e.target.checked;
-        document.getElementById('inv-y').onchange = (e) => profiles[currentDev].invY = e.target.checked;
-
-        // Sliders
-        document.getElementById('rng-sx').oninput = (e) => {
-            const val = parseInt(e.target.value);
-            profiles[currentDev].scaleX = val;
-            document.getElementById('lbl-sx').innerText = val;
-        };
-        document.getElementById('rng-sy').oninput = (e) => {
-            const val = parseInt(e.target.value);
-            profiles[currentDev].scaleY = val;
-            document.getElementById('lbl-sy').innerText = val;
+        document.getElementById('btn-save').onclick = () => {
+            localStorage.setItem('brainiac_matrix_v2', JSON.stringify(profiles));
+            const b = document.getElementById('btn-save');
+            b.innerText = "SAVED!";
+            setTimeout(() => b.innerText = "SAVE CONFIGURATION", 1000);
         };
 
-
-        // --- 4. WEBSOCKET LOGIC ---
+        // --- 4. ENGINE ---
         const ws = new WebSocket(`ws://${window.location.hostname || "192.168.4.1"}/ws`);
-        const logs = document.getElementById('logs');
-        
-        function log(msg) {
-            const d = document.createElement('div');
-            d.innerText = `> ${msg}`;
-            logs.prepend(d);
-            if(logs.children.length > 20) logs.lastChild.remove();
-        }
-
-        ws.onopen = () => log("CONNECTED");
-        ws.onclose = () => log("DISCONNECTED");
-
-        // RENDERING VARS
-        const cursor = document.getElementById('cursor');
+        const state = { Arm: { cx:0, cy:0, tx:0, ty:0 }, Glove: { cx:0, cy:0, tx:0, ty:0 } };
         const arena = document.getElementById('arena');
-        let cx = 0, cy = 0, tx = 0, ty = 0; 
 
         ws.onmessage = (e) => {
             try {
-                const data = JSON.parse(e.data);
+                const packet = JSON.parse(e.data);
+                const devices = Array.isArray(packet) ? packet : [packet];
 
-                // *** CRITICAL FILTER ***
-                // Only process data for the device currently selected in the dropdown
-                if (data.device !== currentDev) return;
+                devices.forEach(data => {
+                    const dev = data.device;
+                    if (!dev) return;
+                    const suffix = dev.toLowerCase();
 
-                // 1. Raw Data
-                document.getElementById('raw-x').innerText = data.x.toFixed(2);
-                document.getElementById('raw-y').innerText = data.y.toFixed(2);
-                document.getElementById('raw-z').innerText = data.z.toFixed(2);
-                
-                let btnText = "OFF";
-                if (data.b1) btnText = "BTN 1";
-                if (data.b2) btnText = "BTN 2";
-                if (data.b1 && data.b2) btnText = "BOTH";
-                
-                const btnEl = document.getElementById('raw-btn');
-                btnEl.innerText = btnText;
-                btnEl.style.color = (data.b1 || data.b2) ? "red" : "white";
+                    // UI Updates
+                    document.getElementById(`${suffix}-x`).innerText = data.x.toFixed(1);
+                    document.getElementById(`${suffix}-y`).innerText = data.y.toFixed(1);
+                    document.getElementById(`${suffix}-z`).innerText = data.z.toFixed(1);
+                    
+                    document.getElementById(`${suffix}-lax`).innerText = data.lax || 0;
+                    document.getElementById(`${suffix}-lay`).innerText = data.lay || 0;
+                    document.getElementById(`${suffix}-laz`).innerText = data.laz || 0;
 
-                // 2. Physics Engine (Uses profile[currentDev])
-                const p = profiles[currentDev];
+                    document.getElementById(`${suffix}-b1`).innerText = data.b1;
+                    document.getElementById(`${suffix}-b2`).innerText = data.b2;
 
-                // Sum X
-                let sumX = 0;
-                if (p.mixX.x) sumX += data.x;
-                if (p.mixX.y) sumX += data.y;
-                if (p.mixX.z) sumX += data.z;
+                    // Status
+                    const badge = document.getElementById(`${suffix}-status`);
+                    if (dev === "Glove") {
+                        const isConnected = (data.b2 === 1);
+                        if (!isConnected) {
+                            badge.innerText = "OFFLINE"; badge.style.color = "var(--sub)";
+                        } else {
+                            badge.innerText = (data.b1) ? "CLICK" : "CONNECTED";
+                            badge.style.color = (data.b1) ? "#fff" : "var(--glove-color)";
+                        }
+                    } else {
+                        if (data.b1 || data.b2) {
+                            badge.innerText = "CLICK"; badge.style.color = "var(--arm-color)";
+                            document.getElementById('cursor-arm').classList.add('click');
+                        } else {
+                            badge.innerText = "IDLE"; badge.style.color = "#888";
+                            document.getElementById('cursor-arm').classList.remove('click');
+                        }
+                    }
 
-                // Sum Y
-                let sumY = 0;
-                if (p.mixY.x) sumY += data.x;
-                if (p.mixY.y) sumY += data.y;
-                if (p.mixY.z) sumY += data.z;
+                    // --- MATRIX CALCULATOR ---
+                    const p = profiles[dev];
+                    
+                    // Helper to safely get value or 0
+                    const getVal = (k) => (data[k] !== undefined) ? data[k] : 0;
 
-                // Invert
-                if(p.invX) sumX = -sumX;
-                if(p.invY) sumY = -sumY;
+                    // Compute Screen X
+                    let rawX = 0;
+                    KEYS.forEach(k => { rawX += getVal(k) * (p.mixX[k] || 0); });
 
-                // Scale
-                let moveX = sumX * p.scaleX;
-                let moveY = sumY * p.scaleY;
+                    // Compute Screen Y
+                    let rawY = 0;
+                    KEYS.forEach(k => { rawY += getVal(k) * (p.mixY[k] || 0); });
 
-                // Clamp to Arena
-                let w = arena.clientWidth;
-                let h = arena.clientHeight;
-                
-                tx = (w / 2) + moveX;
-                ty = (h / 2) + moveY;
+                    let moveX = rawX * (p.scale / 10); // Accel numbers are big, scale divider helps
+                    let moveY = rawY * (p.scale / 10);
+                    
+                    let w = arena.clientWidth;
+                    let h = arena.clientHeight;
 
-                tx = Math.max(10, Math.min(w - 10, tx));
-                ty = Math.max(10, Math.min(h - 10, ty));
+                    state[dev].tx = Math.max(10, Math.min(w-10, (w/2) + moveX));
+                    state[dev].ty = Math.max(10, Math.min(h-10, (h/2) + moveY));
+                });
 
-                // Click Visual
-                if(data.b1 || data.b2) cursor.classList.add('click');
-                else cursor.classList.remove('click');
-
-            } catch(err) {
-                console.error(err);
-            }
+            } catch(err) { console.error(err); }
         };
 
         function render() {
-            // Smooth LERP
-            cx += (tx - cx) * 0.2; 
-            cy += (ty - cy) * 0.2;
-            cursor.style.left = `${cx}px`;
-            cursor.style.top = `${cy}px`;
+            ['Arm', 'Glove'].forEach(dev => {
+                const s = state[dev];
+                s.cx += (s.tx - s.cx) * 0.2;
+                s.cy += (s.ty - s.cy) * 0.2;
+                
+                const el = document.getElementById(`cursor-${dev.toLowerCase()}`);
+                if(el) {
+                    el.style.left = `${s.cx}px`;
+                    el.style.top = `${s.cy}px`;
+                }
+            });
             requestAnimationFrame(render);
         }
 
-        // Initialize UI
-        loadProfileToUI();
+        loadUI();
         render();
 
     </script>

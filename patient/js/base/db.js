@@ -1,4 +1,4 @@
-/* [2026-01-29 02:00 pm - batch 2.0.0] */
+/* [2026-01-30 - COMPLETE EDITION] */
 /* patient/js/base/db.js */
 
 window.BrainiacDB = {
@@ -18,6 +18,39 @@ window.BrainiacDB = {
     },
 
     /**
+     * [NEW] READ: Fetch file content from SD Card
+     * @param {string} filename - e.g., "/patients/patient/logs.csv"
+     */
+    read: async function(filename) {
+        // 1. Check Cache first to save speed
+        if (this.cache[filename]) {
+            console.log(`[DB] Cache Hit: ${filename}`);
+            return this.cache[filename];
+        }
+
+        console.log(`[DB] Fetching: ${filename}...`);
+
+        // 2. Network Request to C++ Backend
+        try {
+            // This matches server->on("/db/read", ...) in NetworkManager.h
+            const params = new URLSearchParams({ file: filename });
+            const response = await fetch(`/db/read?${params.toString()}`);
+            
+            if (response.ok) {
+                const text = await response.text();
+                this.cache[filename] = text; // Store in cache
+                return text;
+            } else {
+                console.warn(`[DB] File not found or empty: ${filename}`);
+                return null;
+            }
+        } catch (e) {
+            console.error("[DB] Read Network Error:", e);
+            return null;
+        }
+    },
+
+    /**
      * CORE: Write data to the ESP32 Database
      * @param {string} filename - e.g., "/patients/patient/logs.csv"
      * @param {string} content - The text to append
@@ -26,7 +59,7 @@ window.BrainiacDB = {
     write: async function(filename, content, mode = "append") {
         console.log(`[DB] Saving to ${filename}...`);
         
-        // 1. Optimistic Cache Update (Update local copy immediately)
+        // 1. Optimistic Cache Update (Update local copy immediately so UI feels fast)
         if (this.cache[filename]) {
             if (mode === 'write') this.cache[filename] = content;
             else this.cache[filename] += content;
@@ -35,6 +68,7 @@ window.BrainiacDB = {
         // 2. Network Request
         try {
             const params = new URLSearchParams({ file: filename, mode: mode });
+            // This matches server->on("/db/write", ...) in NetworkManager.h
             const response = await fetch(`/db/write?${params.toString()}`, {
                 method: 'POST',
                 body: content
@@ -44,7 +78,7 @@ window.BrainiacDB = {
             else console.error("[DB] Save Failed", await response.text());
             
         } catch (e) {
-            console.error("[DB] Network Error:", e);
+            console.error("[DB] Write Network Error:", e);
         }
     },
 
@@ -59,13 +93,14 @@ window.BrainiacDB = {
         // CSV Format: Date, Time, GameID, Score, Reps, Sets, Config
         const csvLine = `\n${date},${time},${gameId},${score},${reps},${sets},"${configSnapshot}"`;
         
+        // Note: DBManager.h automatically prepends "/database" to this path
         const path = `/patients/${user}/logs.csv`;
         this.write(path, csvLine, "append");
     },
 
     /**
      * SYNC: Listen for "Update" broadcasts from ESP32
-     * Call this from your main WebSocket handler
+     * Call this from your main WebSocket handler if you implement live sync
      */
     handleSync: function(msg) {
         if (msg.type === 'UPDATE') {
