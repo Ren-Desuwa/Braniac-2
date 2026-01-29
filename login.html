@@ -3,293 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainiac OS - Secure Login</title>
+    <title>Brainiac OS</title>
     <style>
-        /* --- RESET & VARIABLES --- */
-        :root {
-            --color-bg: #0d1117;
-            --color-surface: #161b22;
-            --color-border: #30363d;
-            --color-accent: #2f81f7;
-            --color-text: #c9d1d9;
-            --color-text-dim: #8b949e;
-            --color-error: #f85149;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        /* --- LOGIN CARD --- */
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            padding: 2.5rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .brand { text-align: center; margin-bottom: 2rem; }
-        .brand h1 {
-            font-size: 1.8rem; letter-spacing: 2px; text-transform: uppercase;
-            color: var(--color-accent); margin-bottom: 0.5rem;
-        }
-        .brand p { font-size: 0.95rem; color: var(--color-text-dim); }
-
-        /* --- FORM ELEMENTS --- */
-        .form-group { margin-bottom: 1.5rem; }
-        
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: 600; color: var(--color-text); }
-
-        input {
-            width: 100%; padding: 14px; background: #0d1117;
-            border: 1px solid var(--color-border); border-radius: 6px;
-            color: white; font-size: 1.1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        input:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgba(47, 129, 247, 0.2); }
-
-        button {
-            width: 100%; padding: 14px; background: var(--color-accent);
-            color: white; border: none; border-radius: 6px;
-            font-size: 1.1rem; font-weight: bold; cursor: pointer;
-            transition: opacity 0.2s; margin-top: 1rem;
-        }
+        body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { width: 350px; padding: 2rem; background: #161b22; border: 1px solid #30363d; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { text-align: center; color: #2f81f7; margin-top: 0; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #010409; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #2f81f7; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         button:hover { opacity: 0.9; }
-
-        /* --- UTILS --- */
-        .error-msg {
-            color: var(--color-error); font-size: 0.95rem; text-align: center;
-            margin-top: 1.5rem; min-height: 1.2em; font-weight: 500;
-        }
-
-        .hint {
-            margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--color-border);
-            font-size: 0.85rem; color: var(--color-text-dim); text-align: center; line-height: 1.6;
-        }
-        .hint code {
-            background: rgba(110,118,129,0.4); padding: 2px 5px;
-            border-radius: 4px; color: white; font-family: monospace;
-        }
-
-        /* --- DEBUG CONSOLE (Visual) --- */
-        #debug-console {
-            position: fixed; top: 0; left: 0; width: 300px; height: 100vh;
-            background: rgba(0,0,0,0.8); color: lime; font-family: monospace;
-            font-size: 12px; padding: 10px; overflow-y: auto; z-index: 10000;
-            pointer-events: none; /* Let clicks pass through */
-        }
-        
-        /* --- MOUSE CSS (EMBEDDED) --- */
-        #pseudo-cursor {
-            position: fixed; top: 0; left: 0; width: 40px; height: 40px;
-            z-index: 9999; pointer-events: none;
-            will-change: transform; transform: translate(-50%, -50%);
-            display: flex; align-items: center; justify-content: center;
-        }
-        #pseudo-cursor .cursor-pointer {
-            width: 15px; height: 15px; background-color: #2f81f7;
-            border-radius: 50%; box-shadow: 0 0 10px rgba(47, 129, 247, 0.5);
-            border: 2px solid white;
-        }
-        #pseudo-cursor.clicking .cursor-pointer {
-            background-color: #FFD700; transform: scale(0.8);
-        }
+        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
+        a { color: #58a6ff; text-decoration: none; }
     </style>
 </head>
 <body>
-
-    <div id="debug-console">DEBUG LOG:<br></div>
-
-    <div class="login-container">
-        <div class="brand">
-            <h1>Test Lorem Ipsum</h1>
-            <p>Lorem Ipsum</p>
-        </div>
-
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" placeholder="Enter username" autocomplete="off" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
-
-            <button type="submit">Sign In</button>
-            <div id="errorDisplay" class="error-msg"></div>
+    <div class="card">
+        <h2>BRAINIAC OS</h2>
+        <form id="login">
+            <input type="text" id="user" placeholder="Username" required>
+            <input type="password" id="pass" placeholder="Password" required>
+            <button type="submit">SECURE LOGIN</button>
         </form>
-
-        <div class="hint">
-            <strong>Details Lorem Ipsum</strong><br>
-            something: <code>patient</code> / <code>123</code><br>
-            Something else: <code>pt</code> / <code>admin</code>
+        <div class="footer">
+            <a href="/config.html">System Configuration & Calibration</a>
         </div>
     </div>
-
     <script>
-        // --- LOGGER UTILS ---
-        function log(msg, data = "") {
-            const timestamp = new Date().toLocaleTimeString();
-            const logLine = `[${timestamp}] ${msg} ${data ? JSON.stringify(data) : ''}`;
-            
-            console.log(logLine); // To Browser Console
-            
-            // To Visual Debugger
-            const debugEl = document.getElementById('debug-console');
-            if(debugEl) {
-                debugEl.innerHTML += `<div>${logLine}</div>`;
-                debugEl.scrollTop = debugEl.scrollHeight;
-            }
-        }
-
-        // --- LOGIN LOGIC ---
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('login').onsubmit = (e) => {
             e.preventDefault();
-            const user = document.getElementById('username').value.trim().toLowerCase();
-            const pass = document.getElementById('password').value;
-            const errorEl = document.getElementById('errorDisplay');
-
-            if (user === 'patient' && pass === '123') {
-                saveSession(user, 'patient');
-                window.location.href = 'patient/patient-index.html';
-            } 
-            else if (user === 'pt' && pass === 'admin') {
-                saveSession(user, 'therapist');
-                window.location.href = 'pt/pt-index.html';
-            } 
-            else {
-                errorEl.textContent = "Invalid credentials. Please try again.";
-                shakeForm();
+            const u = document.getElementById('user').value.toLowerCase();
+            const p = document.getElementById('pass').value;
+            if((u==='patient' && p==='123') || (u==='pt' && p==='admin')) {
+                // In a real app, you would redirect here
+                alert("ACCESS GRANTED");
+            } else {
+                alert("ACCESS DENIED");
             }
-        });
-
-        function saveSession(username, role) {
-            const session = { user: username, role: role, loginTime: Date.now() };
-            localStorage.setItem('brainiac_session', JSON.stringify(session));
-        }
-
-        function shakeForm() {
-            const container = document.querySelector('.login-container');
-            container.style.transform = 'translateX(10px)';
-            setTimeout(() => { container.style.transform = 'translateX(-10px)'; }, 100);
-            setTimeout(() => { container.style.transform = 'translateX(10px)'; }, 200);
-            setTimeout(() => { container.style.transform = 'translateX(0)'; }, 300);
-        }
-
-        // --- EMBEDDED MOUSE.JS (DEBUG VERSION) ---
-        log("[INIT] Starting Embedded Mouse Script...");
-
-        document.addEventListener('DOMContentLoaded', () => {
-            log("[INIT] DOM Loaded. Creating Cursor...");
-
-            // 1. Create UI
-            const cursor = document.createElement('div');
-            cursor.id = 'pseudo-cursor';
-            cursor.innerHTML = '<div class="cursor-pointer"></div>';
-            document.body.appendChild(cursor);
-            log("[INIT] Cursor appended to body.");
-
-            // 2. State
-            let posX = window.innerWidth / 2;
-            let posY = window.innerHeight / 2;
-            
-            // 3. Connect WebSocket
-            let wsHost = window.location.hostname;
-            if (!wsHost) {
-                log("[WARN] No hostname found (file://?). Defaulting to 192.168.4.1");
-                wsHost = "192.168.4.1";
-            }
-            
-            const wsUrl = `ws://${wsHost}/ws`;
-            log(`[WS] Attempting connect to: ${wsUrl}`);
-
-            let socket;
-            try {
-                socket = new WebSocket(wsUrl);
-            } catch (e) {
-                log("[CRITICAL] WebSocket Constructor Failed:", e);
-            }
-
-            if (socket) {
-                socket.onopen = () => {
-                    log("[WS] Connection OPEN! Waiting for data...");
-                    // Visual confirm
-                    cursor.querySelector('.cursor-pointer').style.backgroundColor = "#00FF00"; 
-                };
-
-                socket.onerror = (e) => {
-                    log("[WS] Error:", e);
-                };
-
-                socket.onclose = (e) => {
-                    log(`[WS] Closed. Code: ${e.code}, Reason: ${e.reason}`);
-                };
-
-                let packetCount = 0;
-
-                socket.onmessage = (event) => {
-                    try {
-                        const data = JSON.parse(event.data);
-                        
-                        // Log first 10 packets only to avoid spam
-                        if (packetCount < 10) {
-                            log("[RX] Data:", data);
-                            packetCount++;
-                        }
-
-                        // VALIDATE KEYS
-                        if (data.x === undefined || data.y === undefined) {
-                            log("[ERR] Bad Data Packet. Missing x/y.");
-                            return;
-                        }
-
-                        // MOVE LOGIC
-                        posX += data.x * 3.5; 
-                        posY += data.z * 3.5; 
-
-                        // Clamp
-                        posX = Math.max(0, Math.min(window.innerWidth, posX));
-                        posY = Math.max(0, Math.min(window.innerHeight, posY));
-
-                        // Apply
-                        cursor.style.left = `${posX}px`;
-                        cursor.style.top = `${posY}px`;
-
-                        // CLICK LOGIC
-                        if (data.b1 === 1) {
-                            cursor.classList.add('clicking');
-                            // Actually click element
-                            cursor.style.visibility = 'hidden';
-                            let el = document.elementFromPoint(posX, posY);
-                            cursor.style.visibility = 'visible';
-                            if(el && !el.disabled) {
-                                log("[ACTION] Clicking element:", el.tagName);
-                                el.click();
-                                if(el.tagName === 'INPUT') el.focus();
-                            }
-                        } else {
-                            cursor.classList.remove('clicking');
-                        }
-
-                    } catch (err) {
-                        log("[ERR] Processing Message:", err);
-                    }
-                };
-            }
-        });
+        };
     </script>
 </body>
 </html>

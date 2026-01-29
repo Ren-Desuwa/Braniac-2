@@ -139,3 +139,6 @@
 ## 6. Sound
 - [ ] Background sound loop implementation.
 - [ ] Sound effect triggers (Success/Fail) in games.
+      
+## 7. Patient
+1. miguel
