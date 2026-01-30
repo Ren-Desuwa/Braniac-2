@@ -39,28 +39,22 @@
         <main id="view-dashboard" class="view-container">
             <section class="dashboard-hero">
                 <div class="card profile-card">
-                    <div class="avatar-large"></div>
+                    <div class="avatar-large" style="background-image: url('assets/miguel-avatar.png'); background-size: cover;"></div>
                     <div class="profile-info">
-                        <h1>Patient Name</h1>
-                        <p>Patient Game Title</p>
-                    </div>
+                        <h1>Miguel</h1> <p>Honey Bee Master</p> </div>
                     <div class="badge-container">
-                        <div class="badge-box">Badge</div>
+                        <div class="badge-box">Lead Developer</div>
                     </div>
                 </div>
                 <div class="card level-card">
-                    <h2>Level 1</h2>
-                    <div class="xp-bar-container"><div class="xp-bar-fill"></div></div>
-                    <p class="xp-text">20/40 xp</p>
+                    <h2>Level 5</h2> <div class="xp-bar-container"><div class="xp-bar-fill" style="width: 75%;"></div></div>
+                    <p class="xp-text">30/40 xp</p>
                 </div>
             </section>
             <section class="dashboard-content">
                 <aside class="card sidebar-panel">
-                    <h3 class="panel-title">3 Pending tasks</h3>
-                    <div class="task-list">
+                    <h3 class="panel-title">1 Pending task</h3> <div class="task-list">
                         <button class="pill-btn task-btn">Lateral Raise</button>
-                        <button class="pill-btn task-btn">Horizontal Raise</button>
-                        <button class="pill-btn task-btn">Vertical Raise</button>
                     </div>
                 </aside>
                 <div class="feed-panel">
@@ -69,18 +63,14 @@
                             <div class="task-avatar">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                             </div>
-                            <span class="task-title">Lateral Raise</span>
-                            <span class="task-time">12 pm</span>
+                            <span class="task-title">Flexion Routine</span>
+                            <span class="task-time">Today</span>
                         </div>
                         <div class="game-selection">
                             <a href="launcher.html?game=honey-bee" class="game-btn btn-yellow" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Honey Bee Game</a>
-                            
-                            <a href="launcher.html?game=raining-cats" class="game-btn btn-green" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">Raining cats and dogs</a>
                         </div>
                         <div class="task-actions">
-                            <button class="action-btn">Okay!</button>
-                            <button class="action-btn">No</button>
-                            <button class="action-btn">Maybe</button>
+                            <button class="action-btn">Start Session</button>
                         </div>
                     </div>
                 </div>
@@ -178,6 +168,7 @@
     </div>
     <!-- Somehting -->
     <script src="js/db.js"></script>
+    <script src="js/dashboard.js"></script>
     <script src="js/tab-navigation.js"></script>
     <script src="js/settings.js"></script>
 </body>

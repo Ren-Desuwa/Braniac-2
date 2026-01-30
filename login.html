@@ -3,129 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainiac Login</title>
-    <link rel="stylesheet" href="css/global.css"> 
+    <title>Therapist Login</title>
+    <link rel="stylesheet" href="css/global.css">
     <style>
-        /* Login Specific Styles */
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: var(--bg-color, #0d1117); /* Fallback to dark */
-            font-family: 'Segoe UI', sans-serif;
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #0d1117; margin: 0; font-family: 'Segoe UI', sans-serif; }
+        .login-card { 
+            background: #161b22; padding: 3rem; border-radius: 16px; width: 380px; text-align: center; 
+            border: 1px solid #30363d; border-top: 4px solid #2f81f7; /* Blue for PT */
         }
-
-        .login-card {
-            background: var(--surface-color, #161b22);
-            border: 1px solid var(--border-color, #30363d);
-            padding: 2.5rem;
-            border-radius: 16px;
-            width: 380px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            filter: drop-shadow(0 0 10px rgba(47, 129, 247, 0.5));
-        }
-
-        h1 { color: var(--text-main, #fff); margin: 0 0 0.5rem 0; font-size: 1.5rem; }
-        p { color: var(--text-dim, #8b949e); margin: 0 0 2rem 0; font-size: 0.9rem; }
-
-        .input-group { margin-bottom: 1rem; text-align: left; }
-        
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #010409;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
+        h1 { color: white; margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1rem; }
+        input { 
+            width: 100%; padding: 12px; background: #010409; border: 1px solid #30363d; 
+            border-radius: 6px; color: white; text-align: center; font-size: 1rem;
         }
         input:focus { outline: none; border-color: #2f81f7; }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #2f81f7;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s, filter 0.2s;
-            margin-top: 1rem;
+        
+        .btn-enter { 
+            width: 100%; padding: 12px; background: #2f81f7; color: white; border: none; 
+            border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 1rem; 
         }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        button:active { transform: translateY(0); }
+        .btn-enter:hover { background: #58a6ff; }
 
-        .config-link {
-            display: block;
-            margin-top: 1.5rem;
-            color: #58a6ff;
-            text-decoration: none;
-            font-size: 0.8rem;
-            opacity: 0.7;
+        .switch-link { 
+            display: block; margin-top: 1.5rem; color: #8b949e; text-decoration: none; font-size: 0.9rem; 
         }
-        .config-link:hover { opacity: 1; text-decoration: underline; }
+        .switch-link:hover { color: #58a6ff; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <div class="logo">🧠</div>
-        <h1>Brainiac OS</h1>
-        <p>System Access</p>
-
-        <form id="login-form">
-            <div class="input-group">
-                <input type="text" id="user" placeholder="Username" value="Miguel">
-            </div>
-            <div class="input-group">
-                <input type="password" id="pass" placeholder="PIN" value="1234">
-            </div>
-            <button type="submit">ENTER SYSTEM</button>
-        </form>
-
-        <a href="config.html" class="config-link">Hardware Configuration</a>
+        <h1>Therapist Portal</h1>
+        
+        <div class="input-group">
+            <input type="text" id="user" value="pt_joy" placeholder="Username">
+        </div>
+        <div class="input-group">
+            <input type="password" id="pass" value="admin" placeholder="Password">
+        </div>
+        
+        <button class="btn-enter" id="loginBtn">LOGIN AS THERAPIST</button>
+        
+        <a href="patient-login.html" class="switch-link">Not a Doctor? Patient Login →</a>
     </div>
 
     <script>
-    // Use a direct click handler instead of form submit
-    const loginBtn = document.querySelector('button');
-    const userIn = document.getElementById('user');
-    const passIn = document.getElementById('pass');
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const u = document.getElementById('user').value.trim().toLowerCase();
+            const p = document.getElementById('pass').value.trim();
+            const btn = document.getElementById('loginBtn');
 
-    loginBtn.addEventListener('click', (e) => {
-        e.preventDefault(); // Stop any default form actions
-        
-        const u = userIn.value.toLowerCase().trim(); // Add trim() for safety
-        const p = passIn.value.trim();
-
-        if(u === 'miguel' && p === '1234') {
-            console.log("Login success. Navigating...");
-            
-            // FIX: Use replace() so the user can't click 'Back' to return to login
-            // Using './' forces it to look in the relative directory, not root
-            window.location.replace("./patient-index.html"); 
-        } else {
-            // Error handling
-            loginBtn.innerText = "ACCESS DENIED";
-            loginBtn.style.background = "#da3633";
-            setTimeout(() => {
-                loginBtn.innerText = "ENTER SYSTEM";
-                loginBtn.style.background = "#2f81f7";
-            }, 1000);
-        }
-    });
-</script>
+            // PT Validation (Hardcoded for Demo)
+            if ((u === 'pt_joy' || u === 'admin') && p === 'admin') {
+                // 1. Save Session as PT
+                localStorage.setItem('brainiac_session', JSON.stringify({ user: 'pt_joy', role: 'pt' }));
+                
+                // 2. Redirect
+                btn.innerText = "Authenticating...";
+                setTimeout(() => window.location.href = "physical-therapist.html", 500);
+            } else {
+                alert("Invalid Credentials. Default is 'pt_joy' / 'admin'");
+            }
+        });
+    </script>
 </body>
 </html>

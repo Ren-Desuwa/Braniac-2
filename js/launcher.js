@@ -1,5 +1,4 @@
-/* [2026-01-30 - Batch 1.50.0] */
-/* patient/js/games/launcher.js */
+/* [2026-01-31] launcher.js - With Auto-Start Fix */
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -7,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuBtn = document.getElementById('menu-trigger');
     const menu = document.getElementById('main-menu');
     const exitGameBtn = document.getElementById('exit-game-btn');
-    
     const gridContainer = document.getElementById('app-grid');
     const gameFrame = document.getElementById('game-frame');
     
@@ -32,49 +30,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 2. Launch Logic ---
-    document.querySelectorAll('.game-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const url = card.getAttribute('data-game-url');
-            const title = card.getAttribute('data-game-title');
-            
-            // [NEW] Get Config from HTML Attributes
-            const reps = card.getAttribute('data-reps') || 5;
-            const sets = card.getAttribute('data-sets') || 3;
-
-            if (url) launchGame(url, title, reps, sets);
-        });
-    });
-
     function launchGame(url, title, reps, sets) {
-        console.log(`Launching: ${title} with ${reps} Reps / ${sets} Sets`);
+        console.log(`Launching: ${title} (Reps:${reps}, Sets:${sets})`);
         
-        // UI State
+        // Hide Grid, Show Frame
         gridContainer.style.display = 'none';
         
-        // [NEW] Pass config via URL parameters
+        // Construct URL with params for the game to read
         const finalUrl = `${url}?reps=${reps}&sets=${sets}`;
-        
         gameFrame.src = finalUrl;
+        
         gameFrame.classList.add('active');
         exitGameBtn.style.display = 'flex';
         menu.classList.remove('active');
 
         // Show Sidebar & Reset Stats
         sidebar.style.display = 'flex';
-        gameTitleDisplay.textContent = title;
-        updateStats(0, 0, 0); // Reset visual
+        if(gameTitleDisplay) gameTitleDisplay.textContent = title;
+        updateStats(0, 0, 0); 
     }
 
     function closeGame() {
-        gameFrame.src = "";
+        gameFrame.src = ""; // Stop the game
         gameFrame.classList.remove('active');
         gridContainer.style.display = 'flex';
         exitGameBtn.style.display = 'none';
-        sidebar.style.display = 'none'; // Hide sidebar
+        sidebar.style.display = 'none'; 
         menu.classList.remove('active');
+        
+        // Clear the URL param so refreshing doesn't restart the game immediately
+        window.history.replaceState({}, document.title, window.location.pathname);
     }
 
     if (exitGameBtn) exitGameBtn.addEventListener('click', closeGame);
+
+    // Attach Click Listeners to Cards
+    document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const url = card.getAttribute('data-game-url');
+            const title = card.getAttribute('data-game-title');
+            const reps = card.getAttribute('data-reps') || 5;
+            const sets = card.getAttribute('data-sets') || 3;
+
+            if (url) launchGame(url, title, reps, sets);
+        });
+    });
 
     // --- 3. Message Listener (Game -> Launcher) ---
     window.addEventListener('message', (event) => {
@@ -90,17 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if(statSets) statSets.textContent = sets;
     }
 
-    // --- 4. Auto-Start Logic (NEW) ---
-    // Check if URL has ?game=honey-bee
+    // --- 4. Auto-Start Logic (THE FIX) ---
     const urlParams = new URLSearchParams(window.location.search);
     const gameId = urlParams.get('game');
 
     if (gameId) {
+        // Find the card that matches the ID
         const targetCard = document.querySelector(`.game-card[data-game-id="${gameId}"]`);
+        
         if (targetCard) {
-            console.log(`Auto-starting game: ${gameId}`);
-            // Simulate a click to reuse the existing launch logic
+            console.log(`[Auto-Start] Found card for: ${gameId}`);
+            // Force a click on it to trigger the launch
             targetCard.click();
+        } else {
+            console.warn(`[Auto-Start] No card found for ID: ${gameId}`);
         }
     }
 });

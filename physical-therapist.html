@@ -1,1 +1,230 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Brainiac PT</title>
+    
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/dashboard-layout.css">
+    <link rel="stylesheet" href="css/task-layout.css">
+
+    <style>
+        /* Mobile overrides */
+        body { background-color: #f0f2f5; padding-bottom: 80px; padding-top: 0; overflow-x: hidden; }
+        
+        /* HEADER */
+        .mobile-header { background: white; padding: 1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-size: 1.2rem; font-weight: 800; color: var(--accent-blue); }
+        
+        /* VIEWS */
+        .view-section { display: none; padding: 1rem; animation: fadeIn 0.2s ease-out; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- FIXED PATIENT LIST CSS --- */
+        .friend-item {
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            background: white; 
+            padding: 12px 15px; 
+            border-radius: 12px;
+            margin-bottom: 10px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: background 0.2s;
+        }
+        .friend-item:active { background: #f5f5f5; }
+        
+        .friend-avatar {
+            width: 45px; 
+            height: 45px; 
+            min-width: 45px; 
+            border-radius: 50%;
+            background: #eee; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-weight: bold; 
+            color: white; 
+            font-size: 1.1rem;
+            position: relative;
+        }
+        
+        .status-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #ccc; border: 2px solid white;
+            position: absolute; bottom: 0; right: 0;
+        }
+        .status-dot.online { background: #00E676; }
+        
+        .friend-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden; 
+        }
+        
+        .friend-name { font-weight: 700; color: #333; font-size: 1rem; margin-bottom: 2px; }
+        .friend-status { font-size: 0.85rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .friend-status.online { color: #00E676; font-weight: 500; }
+
+        /* Compact Task List */
+        .compact-task { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 15px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid #ccc; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .compact-task.pending { border-left-color: var(--accent-yellow); }
+        .compact-task.completed { border-left-color: var(--accent-green); }
+        .c-status { font-size: 0.75rem; font-weight: bold; padding: 4px 8px; border-radius: 4px; background: #eee; color: #666; }
+        .c-status.done { background: #E8F5E9; color: #2E7D32; }
+        .filter-btn { border: none; background: #e4e6eb; color: #050505; padding: 8px 16px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+        .filter-btn.active { background: var(--accent-blue); color: white; }
+
+        /* Feed Cards */
+        .create-post-card { background: white; padding: 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .cp-header { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+        .cp-input { width: 100%; border: none; background: #f0f2f5; padding: 10px 15px; border-radius: 20px; font-size: 1rem; }
+        .cp-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .cp-btn { flex: 1; padding: 8px; border-radius: 8px; background: #eee; border: none; font-weight: 600; color: #555; }
+        .cp-btn.primary { background: var(--accent-blue); color: white; }
+
+        .feed-card { margin-bottom:20px; border-radius:16px; border:1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.05); background: white; }
+        .feed-header { padding:15px; border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:10px; }
+        .feed-body { padding:15px; }
+
+        /* Bottom Nav */
+        .mobile-bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #888; text-decoration: none; font-size: 0.75rem; width: 60px; }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; }
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-item.active svg { fill: rgba(47, 129, 247, 0.1); }
+    </style>
+</head>
+<body>
+    <header class="mobile-header">
+        <div class="header-title">Brainiac PT</div>
+        <div class="avatar-small" style="width:32px; height:32px; background:#2f81f7; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:0.8rem;">Dr</div>
+    </header>
+
+    <main id="view-feed" class="view-section active">
+        <div class="create-post-card">
+            <div class="cp-header">
+                <div style="width:40px; height:40px; background:#2f81f7; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center;">Dr</div>
+                <div style="flex:1;">
+                    <strong style="display:block; font-size:0.9rem;">Assign Task</strong>
+                    <span style="font-size:0.8rem; color:#888;">Visible to Patient</span>
+                </div>
+            </div>
+            <select id="quick-patient" class="cp-input" style="margin-bottom:10px;"><option value="miguel">To: Miguel</option><option value="bert">To: Lolo Bert</option><option value="ken">To: Ken</option></select>
+            <input type="text" id="quick-desc" class="cp-input" placeholder="Instruction note...">
+            <div class="cp-actions">
+                <select id="quick-game" class="cp-btn">
+                    <option value="honey-bee">🐝 Honey Bee</option>
+                    <option value="raining-cats">🐱 Cats & Dogs</option>
+                    <option value="cookout">🍔 Cookout</option>
+                </select>
+                <button class="cp-btn primary" onclick="quickPost()">Post</button>
+            </div>
+        </div>
+
+        <h3 style="font-size:1.1rem; margin-bottom:1rem; color:#444;">Live Updates</h3>
+        <div id="feed-container">
+            <div id="feed-dynamic-insert"></div>
+            <article class="feed-card">
+                <div class="feed-header">
+                    <div class="header-icon" style="width:40px; height:40px; background:#2f81f7; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">PT</div>
+                    <div style="flex:1;"><h2 style="font-size:1rem; margin:0;">Flexion Training</h2><span class="post-date" style="font-size:0.85rem; color:#888;">Assigned to <strong>Miguel</strong> • 2h ago</span></div>
+                    <div style="background:#E8F5E9; color:#2E7D32; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">COMPLETED</div>
+                </div>
+                <div class="feed-body">
+                    <p style="margin-bottom:15px; font-size:1rem; color:#333; line-height:1.5;">Great job maintaining the streak, Miguel. I want you to focus on slow extensions today.</p>
+                    <div style="display:flex; align-items:center; gap:15px; padding:10px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
+                        <div style="width:60px; height:60px; background:#FFF59D; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.8rem;">🐝</div>
+                        <div><h4 style="margin:0; font-size:1rem; color:#333;">Honey Bee</h4><span style="color:#666; font-size:0.9rem;">Target: <strong>3 Sets</strong> of <strong>5 Reps</strong></span></div>
+                    </div>
+                </div>
+            </article>
+            <article class="feed-card">
+                <div class="feed-header">
+                    <div class="header-icon" style="width:40px; height:40px; background:#2f81f7; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">PT</div>
+                    <div style="flex:1;"><h2 style="font-size:1rem; margin:0;">Daily Motion</h2><span class="post-date" style="font-size:0.85rem; color:#888;">Assigned to <strong>Lolo Bert</strong> • 4h ago</span></div>
+                </div>
+                <div class="feed-body">
+                    <p style="margin-bottom:15px; font-size:1rem; color:#333; line-height:1.5;">Keep the wrist loose. Don't rush.</p>
+                    <div style="display:flex; align-items:center; gap:15px; padding:10px; background:#f9f9f9; border-radius:12px; border:1px solid #eee;">
+                        <div style="width:60px; height:60px; background:#FFAB91; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.8rem;">🍔</div>
+                        <div><h4 style="margin:0; font-size:1rem; color:#333;">Cookout</h4><span style="color:#666; font-size:0.9rem;">Target: <strong>2 Sets</strong> of <strong>5 Reps</strong></span></div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <main id="view-tasks" class="view-section">
+        <h3 style="font-size:1.1rem; margin-bottom:1rem; color:#444;">All Tasks</h3>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="filter-btn active" onclick="filterTasks('all', this)">All</button>
+            <button class="filter-btn" onclick="filterTasks('pending', this)">Pending</button>
+            <button class="filter-btn" onclick="filterTasks('completed', this)">Completed</button>
+        </div>
+        <div id="tasks-container">
+            <div id="dynamic-tasks-list"></div>
+            <div class="compact-task completed" data-status="completed">
+                <div class="c-info"><h4>Flexion Training <span>(Miguel)</span></h4><span>Honey Bee • 3x5 Sets</span></div><div class="c-status done">Done</div>
+            </div>
+            <div class="compact-task pending" data-status="pending">
+                <div class="c-info"><h4>Daily Motion <span>(Lolo Bert)</span></h4><span>Cookout • 2x5 Sets</span></div><div class="c-status">Pending</div>
+            </div>
+            <div class="compact-task completed" data-status="completed">
+                <div class="c-info"><h4>High Speed Drill <span>(Ken)</span></h4><span>Raining Cats • 5x20 Sets</span></div><div class="c-status done">Done</div>
+            </div>
+        </div>
+    </main>
+
+    <main id="view-patients" class="view-section">
+        <h3 style="font-size:1.1rem; margin-bottom:1rem; color:#444;">My Patients</h3>
+        <div id="patients-container">
+            
+            <div class="friend-item" onclick="window.location.href='pt-patient-profile.html?id=miguel'">
+                <div class="friend-avatar" style="background:#FFA500">M<div class="status-dot online"></div></div>
+                <div class="friend-info">
+                    <div class="friend-name">Miguel</div>
+                    <div class="friend-status online">Active Now</div>
+                </div>
+            </div>
+
+            <div class="friend-item" onclick="window.location.href='pt-patient-profile.html?id=bert'">
+                <div class="friend-avatar" style="background:#607D8B">L<div class="status-dot"></div></div>
+                <div class="friend-info">
+                    <div class="friend-name">Lolo Bert</div>
+                    <div class="friend-status">Last active 2h ago</div>
+                </div>
+            </div>
+
+            <div class="friend-item" onclick="window.location.href='pt-patient-profile.html?id=ken'">
+                <div class="friend-avatar" style="background:#2196F3">K<div class="status-dot"></div></div>
+                <div class="friend-info">
+                    <div class="friend-name">Ken</div>
+                    <div class="friend-status">Last active 1d ago</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <nav class="mobile-bottom-nav">
+        <a href="#" class="nav-item active" onclick="switchView('feed')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Feed
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('patients')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Patients
+        </a>
+        <a href="#" class="nav-item" onclick="switchView('tasks')">
+            <svg viewBox="0 0 24 24" fill="none"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> Tasks
+        </a>
+    </nav>
+
+    <script src="js/db.js"></script>
+    <script src="js/pt-dashboard.js"></script>
+</body>
+</html>

@@ -9,32 +9,11 @@
 
     <style>
         body, html { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            height: 100%; 
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%; 
             overflow: hidden; 
             background: #0d1117; 
             font-family: 'Segoe UI', sans-serif;
-        }
-
-        /* 1. Dotted Bounds Overlay */
-        .bounds-overlay {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            box-sizing: border-box;
-            border: 4px dashed rgba(47, 129, 247, 0.4);
-            z-index: 9998; /* Below cursors (9999) */
-            pointer-events: none;
-        }
-
-        .bounds-label {
-            position: absolute;
-            bottom: 15px; right: 20px;
-            color: rgba(47, 129, 247, 0.6);
-            font-weight: bold;
-            text-transform: uppercase;
         }
 
         iframe {
@@ -44,30 +23,20 @@
             position: relative;
             z-index: 1; 
         }
-
-        /* Ensure cursors are hidden by default until connected if desired, 
-           or leave them visible. Here we leave them visible but centered. */
-        .remote-cursor {
-            /* Basic positioning handled by mouse.css, 
-               but we ensure they start centered or hidden */
-            display: none; /* JS will show them when data arrives */
-        }
     </style>
 </head>
 <body>
 
-    <div class="bounds-overlay">
-        <div class="bounds-label">Active Gyro Area</div>
-    </div>
+    <div class="bounds-overlay"></div>
 
     <div id="cursor-Arm" class="remote-cursor">
-        <div class="cursor-pointer" style="background:#00E676; box-shadow:0 0 10px #00E676;"></div>
-        <div class="cursor-label" style="color:#00E676; text-shadow: 1px 1px 2px black;">ARM</div>
+        <div class="cursor-pointer" style="background:#00E676;"></div>
+        <div class="dwell-ring"></div>
     </div>
 
     <div id="cursor-Glove" class="remote-cursor">
-        <div class="cursor-pointer" style="background:#00e5ff; box-shadow:0 0 10px #00e5ff;"></div>
-        <div class="cursor-label" style="color:#00e5ff; text-shadow: 1px 1px 2px black;">GLOVE</div>
+        <div class="cursor-pointer" style="background:#00e5ff;"></div>
+        <div class="dwell-ring"></div>
     </div>
 
     <iframe id="app-frame" src="login.html"></iframe>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Login</title>
+    <link rel="stylesheet" href="css/global.css">
+    <style>
+        body { display: flex; align-items: center; justify-content: center; height: 100vh; background: #0d1117; margin: 0; font-family: 'Segoe UI', sans-serif; }
+        .login-card { 
+            background: #161b22; padding: 3rem; border-radius: 16px; width: 380px; text-align: center; 
+            border: 1px solid #30363d; border-top: 4px solid #76FF03; /* Green for Patient */
+        }
+        h1 { color: white; margin-bottom: 2rem; }
+        .input-group { margin-bottom: 1rem; }
+        input { 
+            width: 100%; padding: 15px; background: #010409; border: 1px solid #30363d; 
+            border-radius: 8px; color: white; text-align: center; font-size: 1.2rem;
+        }
+        input:focus { outline: none; border-color: #76FF03; }
+        
+        .btn-enter { 
+            width: 100%; padding: 15px; background: #238636; color: white; border: none; 
+            border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 1rem; 
+        }
+        .btn-enter:hover { background: #2ea043; }
+
+        .switch-link { 
+            display: block; margin-top: 1.5rem; color: #8b949e; text-decoration: none; font-size: 0.9rem; 
+        }
+        .switch-link:hover { color: #76FF03; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h1>Patient Access</h1>
+        
+        <div class="input-group">
+            <input type="text" id="user" value="Miguel" placeholder="Name">
+        </div>
+        <div class="input-group">
+            <input type="password" id="pass" value="1234" placeholder="PIN">
+        </div>
+        
+        <button class="btn-enter" id="loginBtn">START SESSION</button>
+        
+        <a href="login.html" class="switch-link">← Back to Therapist Login</a>
+    </div>
+
+    <script>
+        document.getElementById('loginBtn').addEventListener('click', () => {
+            const u = document.getElementById('user').value.trim().toLowerCase();
+            const p = document.getElementById('pass').value.trim();
+            const btn = document.getElementById('loginBtn');
+
+            // Patient Validation (Hardcoded for Demo)
+            if (u === 'miguel' && p === '1234') {
+                // 1. Save Session as Miguel
+                localStorage.setItem('brainiac_session', JSON.stringify({ user: 'miguel', role: 'patient' }));
+                
+                // 2. Redirect
+                btn.innerText = "Welcome Miguel...";
+                btn.style.background = "#2ea043";
+                setTimeout(() => window.location.href = "patient-index.html", 500);
+            } else {
+                alert("Incorrect PIN. Try '1234'");
+            }
+        });
+    </script>
+</body>
+</html>

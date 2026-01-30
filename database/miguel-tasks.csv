@@ -1,0 +1,6 @@
+task_id,assigned_by_id,title,description,game_id,reps,sets,status,posted_time
+1706680000,pt_joy,Flexion Drill,"Warm up strictly",honey-bee,5,3,pending,09:00 AM
+105,pt_joy,Morning Warmup,"Let's start the day with some light flexion. Remember to keep your back straight.",honey-bee,5,3,pending,08:30 AM
+104,dr_strange,Reflex Check,"I noticed your reaction time was slower yesterday. Try this high-speed set.",raining-cats,10,2,pending,09:15 AM
+103,nurse_jackie,Lunch Prep,"Simulate serving food. Focus on accuracy, not speed.",cookout,10,1,pending,11:00 AM
+102,pt_joy,Cooldown Flight,"Great work on the resistance training. Just a light fly to cool down.",honey-bee,3,1,completed,01:45 PM

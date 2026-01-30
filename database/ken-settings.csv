@@ -1,0 +1,5 @@
+category,key,value
+mouse,sensitivity_x,0.8
+mouse,sensitivity_y,0.8
+audio,volume_sfx,60
+audio,volume_music,80

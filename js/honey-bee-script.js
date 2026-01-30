@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const pSets = parseInt(urlParams.get('sets'));
 
     const GAME_CONFIG = {
-        targetReps: pReps || 5, // Use URL param, or default to 5
-        targetSets: pSets || 3, // Use URL param, or default to 3
+        targetReps: pReps || 1, // Use URL param, or default to 5
+        targetSets: pSets || 1, // Use URL param, or default to 3
         spawnRate: 1500, 
         maxFlowers: 4, 
     };
