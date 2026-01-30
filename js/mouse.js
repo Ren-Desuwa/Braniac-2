@@ -1,5 +1,4 @@
-/* [2026-01-30] BRAINIAC OS MOUSE DRIVER */
-/* Features: Absolute Mode, Auto-Reconnect, Cross-Iframe Injection */
+/* [2026-01-30] BRAINIAC OS MOUSE DRIVER (FIXED) */
 
 // --- CONFIGURATION ---
 const MOUSE_CONFIG = {
@@ -10,12 +9,22 @@ const MOUSE_CONFIG = {
 };
 
 const DEVICE_CONFIG = {
-    "Arm":   { color: "#00FF00", label: "ARM" },
-    "Glove": { color: "#0055FF", label: "GLOVE" }
+    "Arm":   { color: "#00E676", label: "ARM" },   // Matched config.html colors
+    "Glove": { color: "#00e5ff", label: "GLOVE" }
 };
+
+const cursors = {};
+let socket = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[OS] Mouse Driver Loaded.");
+    
+    // FIX 1: Instantiate Cursors Immediately (The "Ghost" Fix)
+    // This ensures DOM elements exist before any data arrives.
+    Object.keys(DEVICE_CONFIG).forEach(devId => {
+        cursors[devId] = new RemoteCursor(devId);
+    });
+
     connectWebSocket();
 });
 
@@ -23,111 +32,100 @@ document.addEventListener('DOMContentLoaded', () => {
 class RemoteCursor {
     constructor(id) {
         this.id = id;
-        this.x = window.innerWidth/2; 
-        this.y = window.innerHeight/2;
+        this.x = window.innerWidth / 2; 
+        this.y = window.innerHeight / 2;
         this.isPressed = false;
-        this.el = this.createCursorElement(id);
+        
+        // Check if element exists (hardcoded), otherwise create it
+        this.el = document.getElementById(`cursor-${id}`) || this.createCursorElement(id);
+        
+        // Force initial position to center so it's visible
+        this.updateVisuals();
     }
 
     createCursorElement(id) {
         const div = document.createElement('div');
         div.className = 'remote-cursor';
         div.id = `cursor-${id}`;
-        // Default to white if device name doesn't match config exactly
+        
         const cfg = DEVICE_CONFIG[id] || { color: '#FFFFFF', label: id };
         
         div.innerHTML = `
             <div class="cursor-pointer" style="background:${cfg.color}; box-shadow:0 0 10px ${cfg.color}"></div>
-            <div class="cursor-label" style="color:${cfg.color}">${cfg.label}</div>
+            <div class="cursor-label" style="color:${cfg.color}; text-shadow: 1px 1px 2px black;">${cfg.label}</div>
         `;
         document.body.appendChild(div);
         return div;
     }
 
-    /* Updated updatePosition in RemoteCursor Class */
     updatePosition(angleX, angleY) {
-        // 1. Calculate Absolute Mapping
         const cx = window.innerWidth / 2;
         const cy = window.innerHeight / 2;
         const ox = angleX * MOUSE_CONFIG.scale;
         const oy = angleY * MOUSE_CONFIG.scale * (MOUSE_CONFIG.invertY ? -1 : 1);
 
-        // 2. Apply Boundary Clamping (Ensures the mouse never leaves the screen)
-        // We subtract the cursor size (30px) to ensure the full div stays visible
-        const cursorSize = 30; 
-        this.x = Math.max(0, Math.min(window.innerWidth - cursorSize, cx + ox));
-        this.y = Math.max(0, Math.min(window.innerHeight - cursorSize, cy + oy));
+        // Boundary Clamping (30px buffer for cursor size)
+        this.x = Math.max(0, Math.min(window.innerWidth - 30, cx + ox));
+        this.y = Math.max(0, Math.min(window.innerHeight - 30, cy + oy));
 
-        // 3. Visual Move
-        this.el.style.left = this.x + 'px';
-        this.el.style.top = this.y + 'px';
-
-        // 4. Hover Effects (inject into iframe)
+        this.updateVisuals();
         this.dispatchHover();
     }
 
+    updateVisuals() {
+        this.el.style.left = this.x + 'px';
+        this.el.style.top = this.y + 'px';
+    }
+
     dispatchHover() {
+        // ... (Keep your existing iframe injection logic here) ...
         const frame = document.getElementById('app-frame');
         if (frame && frame.contentDocument) {
             const rect = frame.getBoundingClientRect();
-            // Create a fake mouse event inside the iframe
             const evt = new MouseEvent('mousemove', {
                 bubbles: true, cancelable: true,
                 clientX: this.x - rect.left, 
                 clientY: this.y - rect.top,
                 view: frame.contentWindow
             });
-            
-            // Find element under cursor inside iframe to trigger :hover
             const el = frame.contentDocument.elementFromPoint(this.x - rect.left, this.y - rect.top);
             if(el) el.dispatchEvent(evt);
         }
     }
 
     click() {
-        // Visual Feedback
         this.el.classList.add('clicking');
         setTimeout(() => this.el.classList.remove('clicking'), 200);
 
-        // Logic: Find what is under the cursor
         this.el.style.visibility = 'hidden';
-        
         let target = document.elementFromPoint(this.x, this.y);
         
-        // Check if it's the Iframe
         if (target && target.tagName === 'IFRAME') {
-            const rect = target.getBoundingClientRect();
-            const innerX = this.x - rect.left;
-            const innerY = this.y - rect.top;
-            
             try {
+                const rect = target.getBoundingClientRect();
+                const innerX = this.x - rect.left;
+                const innerY = this.y - rect.top;
                 const innerEl = target.contentDocument.elementFromPoint(innerX, innerY);
+                
                 if (innerEl) {
-                    console.log("[OS] Clicking inside Iframe:", innerEl);
                     innerEl.click();
                     innerEl.focus();
-                    
-                    const mDown = new MouseEvent('mousedown', { bubbles:true, clientX: innerX, clientY: innerY });
-                    const mUp = new MouseEvent('mouseup', { bubbles:true, clientX: innerX, clientY: innerY });
-                    innerEl.dispatchEvent(mDown);
-                    innerEl.dispatchEvent(mUp);
+                    // Dispatch detailed events for compatibility
+                    const opts = { bubbles:true, clientX: innerX, clientY: innerY, view: target.contentWindow };
+                    innerEl.dispatchEvent(new MouseEvent('mousedown', opts));
+                    innerEl.dispatchEvent(new MouseEvent('mouseup', opts));
                 }
-            } catch(e) {
-                console.error("[OS] Iframe Access Error:", e);
-            }
+            } catch(e) { console.error("Iframe Access Error:", e); }
         } else if (target) {
             target.click();
         }
-
         this.el.style.visibility = 'visible';
     }
 }
 
 // --- WEBSOCKET MANAGER ---
-const cursors = {};
-let socket = null;
-
 function connectWebSocket() {
+    // FIX 2: Better fallback IP
     const wsUrl = `ws://${window.location.hostname || "192.168.4.1"}/ws`;
     console.log(`[OS] Connecting to ${wsUrl}...`);
     
@@ -136,30 +134,32 @@ function connectWebSocket() {
     socket.onopen = () => console.log("[OS] Connected.");
     
     socket.onclose = () => {
-        console.log("[OS] Disconnected. Retrying in 1s...");
-        setTimeout(connectWebSocket, 1000);
+        console.log("[OS] Disconnected. Retrying in 2s...");
+        setTimeout(connectWebSocket, 2000);
     };
 
     socket.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
-            if(!data.device) return;
-
-            if(!cursors[data.device]) cursors[data.device] = new RemoteCursor(data.device);
             
-            const c = cursors[data.device];
-            c.updatePosition(data.x, data.y);
+            // Handle array of devices or single object
+            const packets = Array.isArray(data) ? data : [data];
 
-            // Handle Click (B1)
-            if(data.b1) {
-                if(!c.isPressed) {
-                    c.isPressed = true;
-                    c.click();
+            packets.forEach(pkt => {
+                if(!pkt.device) return;
+
+                // Create if it doesn't exist (e.g. dynamic new device)
+                if(!cursors[pkt.device]) cursors[pkt.device] = new RemoteCursor(pkt.device);
+                
+                const c = cursors[pkt.device];
+                c.updatePosition(pkt.x, pkt.y);
+
+                if(pkt.b1) {
+                    if(!c.isPressed) { c.isPressed = true; c.click(); }
+                } else {
+                    c.isPressed = false;
                 }
-            } else {
-                c.isPressed = false;
-            }
-
-        } catch(err) {}
+            });
+        } catch(err) { console.error("Parse Error", err); }
     };
 }
