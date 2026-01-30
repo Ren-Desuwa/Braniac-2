@@ -64,14 +64,14 @@ document.addEventListener('DOMContentLoaded', () => {
         flowerTulip: new Image()
     };
     
-    assets.bee.src = ASSET_PATH + 'bee.png';
-    assets.hive.src = ASSET_PATH + 'hive.png';
+    assets.bee.src = ASSET_PATH + 'bee.webp';
+    assets.hive.src = ASSET_PATH + 'hive.webp';
     assets.background.src = ASSET_PATH + 'tree-close.jpg';
-    assets.flowerPink.src = ASSET_PATH + 'pink-flower.png';
-    assets.flowerPinkShine.src = ASSET_PATH + 'pink-flower-noshine.png';
-    assets.flowerPinkNoShine.src = ASSET_PATH + 'pink-flower-shine.png';
-    assets.flowerWhite.src = ASSET_PATH + 'white-flower.png';
-    assets.flowerTulip.src = ASSET_PATH + 'pink-tulip-heart.png';
+    assets.flowerPink.src = ASSET_PATH + 'pink-flower.webp';
+    assets.flowerPinkShine.src = ASSET_PATH + 'pink-flower-noshine.webp';
+    assets.flowerPinkNoShine.src = ASSET_PATH + 'pink-flower-shine.webp';
+    assets.flowerWhite.src = ASSET_PATH + 'white-flower.webp';
+    assets.flowerTulip.src = ASSET_PATH + 'pink-tulip-heart.webp';
 
     assets.background.onload = () => { if(!isPlaying) drawAttractMode(); };
 

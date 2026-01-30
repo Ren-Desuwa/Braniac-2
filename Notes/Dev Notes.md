@@ -144,3 +144,4 @@
 1. miguel
    
 ## 8. just make the game work
+add loading for games

@@ -50,11 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load Background matching Honey Bee structure
     assets.bg.src = ASSET_PATH + 'night-city-vertical.jpg';
-    assets.basket.src = ASSET_PATH + 'basket.png';
+    assets.basket.src = ASSET_PATH + 'basket.webp';
 
     for(let i=1; i<=3; i++) {
-        let c = new Image(); c.src = `${ASSET_PATH}cat-falling-${i}.png`; assets.cats.push(c);
-        let d = new Image(); d.src = `${ASSET_PATH}dog-falling-${i}.png`; assets.dogs.push(d);
+        let c = new Image(); c.src = `${ASSET_PATH}cat-falling-${i}.webp`; assets.cats.push(c);
+        let d = new Image(); d.src = `${ASSET_PATH}dog-falling-${i}.webp`; assets.dogs.push(d);
     }
     
     // Initial Draw when BG loads

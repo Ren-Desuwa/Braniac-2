@@ -99,25 +99,33 @@
     </div>
 
     <script>
-        document.getElementById('login-form').onsubmit = (e) => {
-            e.preventDefault();
-            const u = document.getElementById('user').value.toLowerCase();
-            const p = document.getElementById('pass').value;
+    // Use a direct click handler instead of form submit
+    const loginBtn = document.querySelector('button');
+    const userIn = document.getElementById('user');
+    const passIn = document.getElementById('pass');
 
-            if(u === 'miguel' && p === '1234') {
-                // Navigate THIS frame to the dashboard
-                window.location.href = "patient/patient-index.html"; 
-            } else {
-                // Shake effect or alert
-                const btn = document.querySelector('button');
-                btn.innerText = "ACCESS DENIED";
-                btn.style.background = "#da3633";
-                setTimeout(() => {
-                    btn.innerText = "ENTER SYSTEM";
-                    btn.style.background = "#2f81f7";
-                }, 1000);
-            }
-        };
-    </script>
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault(); // Stop any default form actions
+        
+        const u = userIn.value.toLowerCase().trim(); // Add trim() for safety
+        const p = passIn.value.trim();
+
+        if(u === 'miguel' && p === '1234') {
+            console.log("Login success. Navigating...");
+            
+            // FIX: Use replace() so the user can't click 'Back' to return to login
+            // Using './' forces it to look in the relative directory, not root
+            window.location.replace("./patient-index.html"); 
+        } else {
+            // Error handling
+            loginBtn.innerText = "ACCESS DENIED";
+            loginBtn.style.background = "#da3633";
+            setTimeout(() => {
+                loginBtn.innerText = "ENTER SYSTEM";
+                loginBtn.style.background = "#2f81f7";
+            }, 1000);
+        }
+    });
+</script>
 </body>
 </html>

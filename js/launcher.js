@@ -89,4 +89,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if(statReps) statReps.textContent = reps;
         if(statSets) statSets.textContent = sets;
     }
-});``
+
+    // --- 4. Auto-Start Logic (NEW) ---
+    // Check if URL has ?game=honey-bee
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameId = urlParams.get('game');
+
+    if (gameId) {
+        const targetCard = document.querySelector(`.game-card[data-game-id="${gameId}"]`);
+        if (targetCard) {
+            console.log(`Auto-starting game: ${gameId}`);
+            // Simulate a click to reuse the existing launch logic
+            targetCard.click();
+        }
+    }
+});
