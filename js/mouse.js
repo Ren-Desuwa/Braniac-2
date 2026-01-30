@@ -33,7 +33,8 @@ class RemoteCursor {
         const div = document.createElement('div');
         div.className = 'remote-cursor';
         div.id = `cursor-${id}`;
-        const cfg = DEVICE_CONFIG[id] || { color: '#FFF', label: id };
+        // Default to white if device name doesn't match config exactly
+        const cfg = DEVICE_CONFIG[id] || { color: '#FFFFFF', label: id };
         
         div.innerHTML = `
             <div class="cursor-pointer" style="background:${cfg.color}; box-shadow:0 0 10px ${cfg.color}"></div>
@@ -85,18 +86,16 @@ class RemoteCursor {
         setTimeout(() => this.el.classList.remove('clicking'), 200);
 
         // Logic: Find what is under the cursor
-        // 1. Hide cursor so we don't click ourselves
         this.el.style.visibility = 'hidden';
         
         let target = document.elementFromPoint(this.x, this.y);
         
-        // 2. Check if it's the Iframe
+        // Check if it's the Iframe
         if (target && target.tagName === 'IFRAME') {
             const rect = target.getBoundingClientRect();
             const innerX = this.x - rect.left;
             const innerY = this.y - rect.top;
             
-            // 3. Drill down into the Iframe
             try {
                 const innerEl = target.contentDocument.elementFromPoint(innerX, innerY);
                 if (innerEl) {
@@ -104,17 +103,15 @@ class RemoteCursor {
                     innerEl.click();
                     innerEl.focus();
                     
-                    // Dispatch explicit events for complex apps
                     const mDown = new MouseEvent('mousedown', { bubbles:true, clientX: innerX, clientY: innerY });
                     const mUp = new MouseEvent('mouseup', { bubbles:true, clientX: innerX, clientY: innerY });
                     innerEl.dispatchEvent(mDown);
                     innerEl.dispatchEvent(mUp);
                 }
             } catch(e) {
-                console.error("[OS] Iframe Access Error (CORS?):", e);
+                console.error("[OS] Iframe Access Error:", e);
             }
         } else if (target) {
-            // Normal click on OS layer
             target.click();
         }
 
