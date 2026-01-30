@@ -4,22 +4,22 @@
     --add:#00E676; --sub:#FF3333; --calib:#FFD700; --mode:#ea80fc; --dynamic:#bb86fc; --lock:#ff9800;
 }
 
-/* [FIX 1] This ensures padding doesn't expand the element size */
+/* Base resets */
 * { box-sizing: border-box; } 
 
 body { 
     background: var(--bg); color: var(--text); font-family: 'Segoe UI', monospace; 
-    margin: 0; padding: 0; /* [FIX 2] Remove body padding to fit 100vh exactly */
-    height: 90vh; width: 90vw; overflow: hidden;
+    margin: 0; padding: 0; 
+    height: 100vh; width: 100vw; overflow: hidden;
 }
 
-/* [FIX 3] New Wrapper to handle the grid layout safely */
+/* Main Grid Layout */
 .layout-grid {
     display: grid;
     grid-template-columns: 480px 1fr; 
     height: 100%;
     width: 100%;
-    padding: 15px; /* Moved padding inside the grid container */
+    padding: 15px;
     gap: 15px;
 }
 
@@ -29,8 +29,24 @@ body {
     padding: 15px; 
     border-right: 1px solid #333; 
     display: flex; flex-direction: column; gap: 10px; 
-    overflow-y: auto; /* Only sidebar scrolls, not the whole page */
+    overflow-y: auto; 
     height: 100%;
+}
+
+/* NEW: Console Box for Verbose Logging */
+.console-box {
+    background: #000;
+    border: 1px solid #444;
+    color: #00FF00;
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    height: 150px; /* Fixed height for scrolling */
+    overflow-y: scroll;
+    padding: 8px;
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    box-shadow: inset 0 0 10px #000;
 }
 
 .group { background: #1f1f1f; padding: 12px; border-radius: 8px; border: 1px solid #333; position: relative; }
@@ -59,11 +75,9 @@ label { font-size: 10px; color: #888; display:block; margin-top:4px; font-weight
 .chk-row { display:flex; gap:8px; align-items:center; margin-bottom:5px; background:#111; padding:5px; border-radius:4px; border:1px solid #333; }
 .chk-row:hover { border-color:#555; }
 .chk-row input { margin:0; width:auto; height:auto; }
-.chk-desc { font-size:9px; color:#666; margin-bottom:8px; line-height:1.2; padding-left:5px; }
 
-/* ARENA CONTAINER [FIX 4] */
+/* ARENA */
 .arena-container {
-    /* Holds the arena so it doesn't stretch weirdly */
     width: 100%; height: 100%;
     overflow: hidden;
     position: relative;

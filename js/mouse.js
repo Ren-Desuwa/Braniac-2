@@ -1,16 +1,8 @@
-/* [2026-01-30] BRAINIAC OS MOUSE DRIVER (FIXED) */
+/* [2026-01-30] BRAINIAC OS MOUSE DRIVER (STATIC HTML MODE) */
 
-// --- CONFIGURATION ---
 const MOUSE_CONFIG = {
-    scale: 7,
-    invertY: true,
-    dwellTime: 1500,
-    magnetDist: 40
-};
-
-const DEVICE_CONFIG = {
-    "Arm":   { color: "#00E676", label: "ARM" },   // Matched config.html colors
-    "Glove": { color: "#00e5ff", label: "GLOVE" }
+    sensitivity: 15, // Multiplier for movement
+    deadzone: 0.5    // Minimum movement to register
 };
 
 const cursors = {};
@@ -19,54 +11,52 @@ let socket = null;
 document.addEventListener('DOMContentLoaded', () => {
     console.log("[OS] Mouse Driver Loaded.");
     
-    // FIX 1: Instantiate Cursors Immediately (The "Ghost" Fix)
-    // This ensures DOM elements exist before any data arrives.
-    Object.keys(DEVICE_CONFIG).forEach(devId => {
-        cursors[devId] = new RemoteCursor(devId);
+    // Initialize wrappers for the existing HTML elements
+    ['Arm', 'Glove'].forEach(devId => {
+        const el = document.getElementById(`cursor-${devId}`);
+        if (el) {
+            cursors[devId] = new RemoteCursor(devId, el);
+        } else {
+            console.warn(`[OS] Warning: Element #cursor-${devId} not found in HTML.`);
+        }
     });
 
     connectWebSocket();
 });
 
-// --- CURSOR CLASS ---
 class RemoteCursor {
-    constructor(id) {
+    constructor(id, element) {
         this.id = id;
-        this.x = window.innerWidth / 2; 
+        this.el = element;
+        this.x = window.innerWidth / 2;
         this.y = window.innerHeight / 2;
         this.isPressed = false;
-        
-        // Check if element exists (hardcoded), otherwise create it
-        this.el = document.getElementById(`cursor-${id}`) || this.createCursorElement(id);
-        
-        // Force initial position to center so it's visible
-        this.updateVisuals();
     }
 
-    createCursorElement(id) {
-        const div = document.createElement('div');
-        div.className = 'remote-cursor';
-        div.id = `cursor-${id}`;
-        
-        const cfg = DEVICE_CONFIG[id] || { color: '#FFFFFF', label: id };
-        
-        div.innerHTML = `
-            <div class="cursor-pointer" style="background:${cfg.color}; box-shadow:0 0 10px ${cfg.color}"></div>
-            <div class="cursor-label" style="color:${cfg.color}; text-shadow: 1px 1px 2px black;">${cfg.label}</div>
-        `;
-        document.body.appendChild(div);
-        return div;
-    }
+    updatePosition(gyroX, gyroY) {
+        // Show cursor if it was hidden
+        if (this.el.style.display === 'none' || this.el.style.display === '') {
+            this.el.style.display = 'flex';
+        }
 
-    updatePosition(angleX, angleY) {
+        // Apply Deadzone
+        if (Math.abs(gyroX) < MOUSE_CONFIG.deadzone) gyroX = 0;
+        if (Math.abs(gyroY) < MOUSE_CONFIG.deadzone) gyroY = 0;
+
         const cx = window.innerWidth / 2;
         const cy = window.innerHeight / 2;
-        const ox = angleX * MOUSE_CONFIG.scale;
-        const oy = angleY * MOUSE_CONFIG.scale * (MOUSE_CONFIG.invertY ? -1 : 1);
 
-        // Boundary Clamping (30px buffer for cursor size)
-        this.x = Math.max(0, Math.min(window.innerWidth - 30, cx + ox));
-        this.y = Math.max(0, Math.min(window.innerHeight - 30, cy + oy));
+        // MAPPING: X -> X, Y -> -Y (Inverted)
+        const deltaX = gyroX * MOUSE_CONFIG.sensitivity;
+        const deltaY = gyroY * -MOUSE_CONFIG.sensitivity; 
+
+        // Calculate
+        let rawX = cx + deltaX;
+        let rawY = cy + deltaY;
+
+        // Clamp to Dotted Border (approx 20px padding)
+        this.x = Math.max(20, Math.min(window.innerWidth - 20, rawX));
+        this.y = Math.max(20, Math.min(window.innerHeight - 20, rawY));
 
         this.updateVisuals();
         this.dispatchHover();
@@ -78,7 +68,6 @@ class RemoteCursor {
     }
 
     dispatchHover() {
-        // ... (Keep your existing iframe injection logic here) ...
         const frame = document.getElementById('app-frame');
         if (frame && frame.contentDocument) {
             const rect = frame.getBoundingClientRect();
@@ -88,6 +77,7 @@ class RemoteCursor {
                 clientY: this.y - rect.top,
                 view: frame.contentWindow
             });
+            
             const el = frame.contentDocument.elementFromPoint(this.x - rect.left, this.y - rect.top);
             if(el) el.dispatchEvent(evt);
         }
@@ -110,12 +100,11 @@ class RemoteCursor {
                 if (innerEl) {
                     innerEl.click();
                     innerEl.focus();
-                    // Dispatch detailed events for compatibility
                     const opts = { bubbles:true, clientX: innerX, clientY: innerY, view: target.contentWindow };
                     innerEl.dispatchEvent(new MouseEvent('mousedown', opts));
                     innerEl.dispatchEvent(new MouseEvent('mouseup', opts));
                 }
-            } catch(e) { console.error("Iframe Access Error:", e); }
+            } catch(e) { console.error("Iframe Click Error", e); }
         } else if (target) {
             target.click();
         }
@@ -123,43 +112,31 @@ class RemoteCursor {
     }
 }
 
-// --- WEBSOCKET MANAGER ---
 function connectWebSocket() {
-    // FIX 2: Better fallback IP
     const wsUrl = `ws://${window.location.hostname || "192.168.4.1"}/ws`;
-    console.log(`[OS] Connecting to ${wsUrl}...`);
-    
     socket = new WebSocket(wsUrl);
-
-    socket.onopen = () => console.log("[OS] Connected.");
     
-    socket.onclose = () => {
-        console.log("[OS] Disconnected. Retrying in 2s...");
-        setTimeout(connectWebSocket, 2000);
-    };
+    socket.onopen = () => console.log("[OS] Connected.");
+    socket.onclose = () => setTimeout(connectWebSocket, 2000);
 
     socket.onmessage = (e) => {
         try {
             const data = JSON.parse(e.data);
-            
-            // Handle array of devices or single object
             const packets = Array.isArray(data) ? data : [data];
 
             packets.forEach(pkt => {
-                if(!pkt.device) return;
-
-                // Create if it doesn't exist (e.g. dynamic new device)
-                if(!cursors[pkt.device]) cursors[pkt.device] = new RemoteCursor(pkt.device);
-                
                 const c = cursors[pkt.device];
+                if (!c) return; // Ignore if no matching HTML element exists
+
                 c.updatePosition(pkt.x, pkt.y);
 
-                if(pkt.b1) {
+                // Handle Button (1 = pressed)
+                if(pkt.b1 === 1) {
                     if(!c.isPressed) { c.isPressed = true; c.click(); }
                 } else {
                     c.isPressed = false;
                 }
             });
-        } catch(err) { console.error("Parse Error", err); }
+        } catch(err) {}
     };
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainiac V7: Open Box</title>
+    <title>Brainiac V7: Config</title>
     <link rel="stylesheet" href="css/config-style.css">
 </head>
 <body>
@@ -19,8 +19,21 @@
     <div class="layout-grid">
         
         <div class="sidebar">
-            <button id="btn-save" class="btn-main">SAVE CONFIGURATION???</button>
-            <button onclick="resetCenter()" class="btn-main" style="background:#444; margin-top:5px;">RESET CENTER</button>
+            <button id="btn-save" class="btn-main">SAVE CONFIGURATION</button>
+            <div style="display:flex; gap:5px; margin-top:5px;">
+                <button onclick="resetCenter()" class="btn-main" style="background:#444;">RESET CENTER</button>
+                <button onclick="factoryReset()" class="btn-main" style="background:#da3633;">RESET ALL</button>
+            </div>
+
+            <div class="chk-row" style="margin-top: 10px; background: #220000; border: 1px solid #ff0000;">
+                <input type="checkbox" id="chk-debug">
+                <label style="color: #ff5555; font-weight: bold; cursor:pointer;" for="chk-debug">ENABLE VERBOSE LOGGING</label>
+            </div>
+
+            <div id="console-log" class="console-box">
+                [SYSTEM] Ready.<br>
+                > Toggle 'Enable Verbose Logging' to diagnose connection issues.
+            </div>
 
             <div class="group" style="border-left: 4px solid var(--arm);">
                 <h3 style="color:var(--arm)">ARM 
