@@ -142,3 +142,5 @@
       
 ## 7. Patient
 1. miguel
+   
+## 8. just make the game work

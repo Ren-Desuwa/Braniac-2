@@ -1,4 +1,4 @@
-/* [2026-01-27 11:15 pm - batch 1.38.0] */
+/* [2026-01-30 - Batch 1.50.0] */
 /* patient/js/games/launcher.js */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -36,16 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
         card.addEventListener('click', () => {
             const url = card.getAttribute('data-game-url');
             const title = card.getAttribute('data-game-title');
-            if (url) launchGame(url, title);
+            
+            // [NEW] Get Config from HTML Attributes
+            const reps = card.getAttribute('data-reps') || 5;
+            const sets = card.getAttribute('data-sets') || 3;
+
+            if (url) launchGame(url, title, reps, sets);
         });
     });
 
-    function launchGame(url, title) {
-        console.log(`Launching: ${title}`);
+    function launchGame(url, title, reps, sets) {
+        console.log(`Launching: ${title} with ${reps} Reps / ${sets} Sets`);
         
         // UI State
         gridContainer.style.display = 'none';
-        gameFrame.src = url;
+        
+        // [NEW] Pass config via URL parameters
+        const finalUrl = `${url}?reps=${reps}&sets=${sets}`;
+        
+        gameFrame.src = finalUrl;
         gameFrame.classList.add('active');
         exitGameBtn.style.display = 'flex';
         menu.classList.remove('active');
@@ -70,9 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 3. Message Listener (Game -> Launcher) ---
     window.addEventListener('message', (event) => {
         const data = event.data;
-        
-        // Security check: You might want to check event.origin in production
-        
         if (data.type === 'updateStats') {
             updateStats(data.score, data.reps, data.sets);
         }
@@ -83,4 +89,4 @@ document.addEventListener('DOMContentLoaded', () => {
         if(statReps) statReps.textContent = reps;
         if(statSets) statSets.textContent = sets;
     }
-});
+});``

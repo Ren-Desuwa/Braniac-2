@@ -10,18 +10,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const startScreen = document.getElementById('startScreen');
     const startBtn = document.getElementById('startGameBtn');
     const screenTitle = document.getElementById('screenTitle');
-    const screenDesc = document.getElementById('screenDesc');
     
     // THE NEW CSS GUIDE TRACK
     const guideTrack = document.getElementById('guide-track');
 
     // --- LOGIC CONFIG ---
+    // [NEW] Parse URL for override
+    const urlParams = new URLSearchParams(window.location.search);
+    const pReps = parseInt(urlParams.get('reps'));
+    const pSets = parseInt(urlParams.get('sets'));
+
     const GAME_CONFIG = {
-        targetReps: 5,
-        targetSets: 3,
+        targetReps: pReps || 5, // Use URL param, or default to 5
+        targetSets: pSets || 3, // Use URL param, or default to 3
         spawnRate: 1500, 
-        maxFlowers: 4, // Allow more flowers for "Clumping" look
+        maxFlowers: 4, 
     };
+    
+    // Update the start screen text to reflect the actual config
+    const screenDesc = document.getElementById('screenDesc');
+    if(screenDesc) {
+        screenDesc.innerHTML = `
+            <strong>Goal:</strong> ${GAME_CONFIG.targetSets} Sets of ${GAME_CONFIG.targetReps} Reps<br>
+            Follow the arrows.<br>
+            Collect flowers, then return to hive.
+        `;
+    }
+// ... rest of f
     
     // --- RESOLUTION ---
     const BASE_W = 650;

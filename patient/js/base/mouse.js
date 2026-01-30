@@ -1,14 +1,19 @@
-/* [2026-01-30 - MULTI-CURSOR FINAL - FIXED] */
-/* Fixes: Event Dispatching for Games, Delta Calculation */
+/* [2026-01-30] BRAINIAC MOUSE - ABSOLUTE MODE */
+/* Settings: Gyro Location, X->X, Y->-Y, Scale 7 */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[MOUSE] Multi-Cursor System Initialized.");
+    console.log("[MOUSE] Absolute Cursor System Initialized.");
 
     const DEVICE_CONFIG = {
         "Arm":   { color: "#00FF00", label: "ARM" },   // Green
         "Glove": { color: "#0055FF", label: "GLOVE" }  // Blue
     };
 
+    // --- CONFIGURATION ---
+    const SCALE = 7;          // Low scale as requested
+    const INVERT_Y = true;    // "Y to -Y"
+    
+    // Interaction Settings
     const DWELL_TIME = 1500;
     const MAGNET_DIST = 40;
     const CLICK_DEBOUNCE = 300;
@@ -19,10 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.x = window.innerWidth / 2;
             this.y = window.innerHeight / 2;
             
-            // [FIX 1] Track previous data to calculate Delta
-            this.lastDataX = null;
-            this.lastDataY = null;
-
             this.isPressed = false;
             this.lastClickTime = 0;
             this.dwellTimer = null;
@@ -48,53 +49,49 @@ document.addEventListener('DOMContentLoaded', () => {
             this.element.style.position = 'fixed';
             this.element.style.zIndex = '9999';
             this.element.style.pointerEvents = 'none'; 
-            this.element.style.transition = 'top 0.05s linear, left 0.05s linear'; // Faster transition
+            // Smooth transition for absolute movements
+            this.element.style.transition = 'top 0.05s linear, left 0.05s linear'; 
             this.element.style.left = this.x + 'px';
             this.element.style.top = this.y + 'px';
 
             document.body.appendChild(this.element);
         }
 
-        update(rawX, rawY) {
-            // [FIX 1] Initialize previous data if first frame
-            if (this.lastDataX === null) {
-                this.lastDataX = rawX;
-                this.lastDataY = rawY;
-                return { target: null, renderX: this.x, renderY: this.y };
-            }
+        update(angleX, angleY) {
+            // --- ABSOLUTE MAPPING LOGIC ---
+            // 1. Get Center of Screen
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
 
-            // [FIX 1] Calculate Change (Delta) since last packet
-            const deltaX = rawX - this.lastDataX;
-            const deltaY = rawY - this.lastDataY;
+            // 2. Calculate Offset (Angle * Scale)
+            // X -> X
+            const offsetX = angleX * SCALE;
             
-            this.lastDataX = rawX;
-            this.lastDataY = rawY;
+            // Y -> -Y (Inverted)
+            const offsetY = angleY * SCALE * (INVERT_Y ? -1 : 1);
 
-            // Apply Delta to Screen Position
-            // Multiplier 15 matches your config.html feel
-            this.x += deltaX * 15; 
-            this.y += deltaY * 15;
+            // 3. Apply to Position
+            this.x = centerX + offsetX;
+            this.y = centerY + offsetY;
 
-            // Clamp to Screen
+            // 4. Clamp to Screen Edges
             this.x = Math.max(0, Math.min(window.innerWidth, this.x));
             this.y = Math.max(0, Math.min(window.innerHeight, this.y));
 
-            // [FIX 2] DISPATCH EVENT FOR GAMES
-            // This tricks the browser into thinking a real mouse moved
+            // --- INTERACTION LOGIC (Magnet/Click) ---
             this.dispatchGlobalEvent(this.x, this.y);
 
-            // Magnet Logic
             let renderX = this.x;
             let renderY = this.y;
             const target = this.findInteractiveElement(this.x, this.y);
             
             if (target) {
                 const rect = target.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                if (Math.hypot(this.x - centerX, this.y - centerY) < MAGNET_DIST) {
-                    renderX = centerX;
-                    renderY = centerY;
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                if (Math.hypot(this.x - cx, this.y - cy) < MAGNET_DIST) {
+                    renderX = cx;
+                    renderY = cy;
                     this.element.classList.add('magnet-active');
                 } else {
                     this.element.classList.remove('magnet-active');
@@ -109,31 +106,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return { target, renderX, renderY };
         }
 
-        // [FIX 2 Helper]
         dispatchGlobalEvent(x, y) {
-            // Dispatch standard mousemove for games
             const evt = new MouseEvent('mousemove', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: x,
-                clientY: y
+                view: window, bubbles: true, cancelable: true,
+                clientX: x, clientY: y
             });
             document.dispatchEvent(evt);
 
-            // Also dispatch to iframes (Launcher logic)
             const iframe = document.querySelector('iframe');
             if (iframe && iframe.contentWindow) {
-                const iframeRect = iframe.getBoundingClientRect();
-                // Adjust coordinates relative to iframe
-                const iframeEvt = new MouseEvent('mousemove', {
-                    view: iframe.contentWindow,
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: x - iframeRect.left,
-                    clientY: y - iframeRect.top
+                const r = iframe.getBoundingClientRect();
+                const ievt = new MouseEvent('mousemove', {
+                    view: iframe.contentWindow, bubbles: true, cancelable: true,
+                    clientX: x - r.left, clientY: y - r.top
                 });
-                iframe.contentDocument.dispatchEvent(iframeEvt);
+                iframe.contentDocument.dispatchEvent(ievt);
             }
         }
 
@@ -159,28 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (now - this.lastClickTime < CLICK_DEBOUNCE) return;
             this.lastClickTime = now;
 
-            // Visual Ripple
             this.createRipple(x, y);
 
-            // Temporarily hide cursor to click element underneath
             this.element.style.visibility = 'hidden';
             let el = document.elementFromPoint(x, y);
             
-            // Handle Iframe Clicks
             const iframe = document.querySelector('iframe');
             if (el === iframe) {
-                const iframeRect = iframe.getBoundingClientRect();
-                el = iframe.contentDocument.elementFromPoint(x - iframeRect.left, y - iframeRect.top);
+                const r = iframe.getBoundingClientRect();
+                el = iframe.contentDocument.elementFromPoint(x - r.left, y - r.top);
             }
 
             this.element.style.visibility = 'visible';
 
             if (el) {
-                console.log(`[${this.name}] Clicked:`, el);
                 el.click();
                 if (['INPUT', 'TEXTAREA'].includes(el.tagName)) el.focus();
-                
-                // Dispatch mousedown/mouseup for games that use it
                 const down = new MouseEvent('mousedown', { bubbles: true, clientX: x, clientY: y });
                 const up = new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y });
                 el.dispatchEvent(down);
@@ -224,16 +205,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let el = document.elementFromPoint(x, y);
             this.element.style.visibility = 'visible';
 
-            // Check if we are over an iframe
             if (el && el.tagName === 'IFRAME') {
                 try {
                     const iframe = el;
-                    const iframeRect = iframe.getBoundingClientRect();
-                    const innerEl = iframe.contentDocument.elementFromPoint(x - iframeRect.left, y - iframeRect.top);
-                    if (innerEl && (innerEl.tagName === 'BUTTON' || innerEl.onclick)) {
-                        return iframe; // Return iframe as the target to trigger Magnet/Dwell
-                    }
-                } catch(e) { /* CORS restriction if different origin */ }
+                    const r = iframe.getBoundingClientRect();
+                    const inner = iframe.contentDocument.elementFromPoint(x - r.left, y - r.top);
+                    if (inner && (inner.tagName === 'BUTTON' || inner.onclick)) return iframe;
+                } catch(e) {}
             }
 
             while (el && el !== document.body) {
@@ -271,8 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const data = JSON.parse(event.data);
             
-            // Sanity check data
-            if (!data.device || isNaN(data.x) || isNaN(data.z)) return;
+            if (!data.device) return;
 
             if (!cursors[data.device]) {
                 cursors[data.device] = new RemoteCursor(data.device);
@@ -280,13 +257,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const cursor = cursors[data.device];
             
-            // Use X and Z (Yaw) for 2D movement
-            const state = cursor.update(data.x, data.z);
+            // --- INPUT MAPPING (USER REQUEST) ---
+            // X -> X
+            // Y -> Y (Logic inside update() handles the invert to -Y)
+            // No other settings.
+            
+            const state = cursor.update(data.x, data.y);
             
             cursor.handleButtons(data.b1, state.target, state.renderX, state.renderY);
 
         } catch (e) {
-            // Ignore malformed JSON
+            // Ignore errors
         }
     };
 });

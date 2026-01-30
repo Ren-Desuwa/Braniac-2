@@ -3,42 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brainiac OS</title>
+    <title>Brainiac OS - Login</title>
     <style>
-        body { background: #0d1117; color: #c9d1d9; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { width: 350px; padding: 2rem; background: #161b22; border: 1px solid #30363d; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        body { 
+            background: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+        .card { 
+            width: 350px; padding: 2rem; background: #161b22; 
+            border: 1px solid #30363d; border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5); 
+            z-index: 10; /* Ensure card is above background but below cursor */
+        }
         h2 { text-align: center; color: #2f81f7; margin-top: 0; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #010409; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #2f81f7; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        input { 
+            width: 100%; padding: 12px; margin: 8px 0; 
+            background: #010409; border: 1px solid #30363d; 
+            color: white; border-radius: 6px; box-sizing: border-box; 
+        }
+        button { 
+            width: 100%; padding: 12px; background: #2f81f7; 
+            color: white; border: none; border-radius: 6px; 
+            cursor: pointer; font-weight: bold; margin-top: 10px; 
+        }
         button:hover { opacity: 0.9; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; }
-        a { color: #58a6ff; text-decoration: none; }
+        
+        /* CURSOR STYLES */
+        .remote-cursor {
+            position: fixed; pointer-events: none; z-index: 9999;
+            transition: top 0.05s linear, left 0.05s linear;
+        }
+        .cursor-pointer {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: rgba(0, 255, 0, 0.8);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            border: 2px solid white;
+        }
+        .cursor-label {
+            position: absolute; top: -20px; left: 0;
+            font-size: 10px; color: #00ff00; font-weight: bold;
+            white-space: nowrap; text-shadow: 1px 1px 0 #000;
+        }
+        .click-ripple {
+            position: fixed; width: 20px; height: 20px;
+            border: 2px solid white; border-radius: 50%;
+            animation: ripple 0.5s linear forwards; pointer-events: none; z-index: 9998;
+        }
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
     </style>
 </head>
 <body>
+
     <div class="card">
         <h2>BRAINIAC OS</h2>
         <form id="login">
-            <input type="text" id="user" placeholder="Username" required>
-            <input type="password" id="pass" placeholder="Password" required>
+            <input type="text" id="user" placeholder="Username" value="Miguel" required>
+            <input type="password" id="pass" placeholder="Password" value="1234" required>
             <button type="submit">SECURE LOGIN</button>
         </form>
-        <div class="footer">
-            <a href="/config.html">System Configuration & Calibration</a>
-        </div>
     </div>
+
     <script>
+        // --- 1. LOGIN LOGIC ---
         document.getElementById('login').onsubmit = (e) => {
             e.preventDefault();
-            const u = document.getElementById('user').value.toLowerCase();
+            const u = document.getElementById('user').value;
             const p = document.getElementById('pass').value;
-            if((u==='patient' && p==='123') || (u==='pt' && p==='admin')) {
-                // In a real app, you would redirect here
-                alert("ACCESS GRANTED");
+            
+            // Simple check (Case insensitive user)
+            if(u.toLowerCase() === 'miguel' && p === '1234') {
+                window.location.href = "/patient/patient-index.html";
             } else {
                 alert("ACCESS DENIED");
+                document.getElementById('pass').value = '';
             }
         };
+
+        // --- 2. INTEGRATED MOUSE DRIVER (Absolute Mode) ---
+        const SCALE = 7;
+        const cursors = {};
+        const wsHost = window.location.hostname || "192.168.4.1";
+        const ws = new WebSocket(`ws://${wsHost}/ws`);
+
+        ws.onopen = () => console.log("[LOGIN] Mouse System Connected");
+        
+        ws.onmessage = (e) => {
+            try {
+                const data = JSON.parse(e.data);
+                if (!data.device) return;
+
+                // Create cursor if missing
+                if (!cursors[data.device]) {
+                    const el = document.createElement('div');
+                    el.className = 'remote-cursor';
+                    const color = (data.device === "Glove") ? "#00e5ff" : "#00E676";
+                    el.innerHTML = `
+                        <div class="cursor-pointer" style="background:${color}; box-shadow: 0 0 10px ${color}"></div>
+                        <div class="cursor-label" style="color:${color}">${data.device.toUpperCase()}</div>
+                    `;
+                    document.body.appendChild(el);
+                    cursors[data.device] = { el: el, pressed: false, lastClick: 0 };
+                }
+
+                const cursor = cursors[data.device];
+
+                // --- ABSOLUTE MAPPING (X->X, Y->-Y) ---
+                const cx = window.innerWidth / 2;
+                const cy = window.innerHeight / 2;
+                
+                let px = cx + (data.x * SCALE);
+                let py = cy + (data.y * SCALE * -1); // Invert Y
+
+                // Clamp
+                px = Math.max(0, Math.min(window.innerWidth, px));
+                py = Math.max(0, Math.min(window.innerHeight, py));
+
+                // Move Visual Cursor
+                cursor.el.style.left = px + 'px';
+                cursor.el.style.top = py + 'px';
+
+                // Handle Click (B1)
+                if (data.b1) {
+                    if (!cursor.pressed) {
+                        cursor.pressed = true;
+                        triggerClick(px, py);
+                    }
+                } else {
+                    cursor.pressed = false;
+                }
+
+            } catch(err) {}
+        };
+
+        function triggerClick(x, y) {
+            // Visual Ripple
+            const r = document.createElement('div');
+            r.className = 'click-ripple';
+            r.style.left = (x - 10) + 'px';
+            r.style.top = (y - 10) + 'px';
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 500);
+
+            // Actual Click
+            // Hide cursor momentarily so we pick the element underneath
+            const els = document.elementsFromPoint(x, y);
+            for(let el of els) {
+                if(el.tagName === 'BUTTON' || el.tagName === 'INPUT') {
+                    el.click();
+                    el.focus();
+                    break;
+                }
+            }
+        }
     </script>
 </body>
 </html>

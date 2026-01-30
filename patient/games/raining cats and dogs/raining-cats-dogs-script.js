@@ -15,9 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const BASE_W = 605;
     const BASE_H = 1000;
 
+    // [NEW] URL Param Override
+    const urlParams = new URLSearchParams(window.location.search);
+    const pReps = parseInt(urlParams.get('reps'));
+    const pSets = parseInt(urlParams.get('sets'));
+
     const CONFIG = {
-        targetReps: 5,
-        targetSets: 3,
+        targetReps: pReps || 5,
+        targetSets: pSets || 3,
         spawnRate: 1200,
         gravity: 3.5,
         armColor: '#ffccaa',
