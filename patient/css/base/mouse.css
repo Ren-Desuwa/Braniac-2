@@ -1,26 +1,27 @@
-/* [2026-01-30 - Brainiac Gyro Mouse (Dual Mode)] */
+/* [FIXED] patient/css/base/mouse.css */
 
-/* 1. The Container - Fixed to viewport */
-#pseudo-cursor {
+/* 1. Change #pseudo-cursor to .remote-cursor */
+.remote-cursor {
     position: fixed;
     top: 0;
     left: 0;
     width: 40px; 
     height: 40px;
-    z-index: 9999; /* Always on top */
-    pointer-events: none; /* CRITICAL: Allows your REAL mouse to click through this dot */
+    z-index: 9999;
+    pointer-events: none;
     will-change: transform; 
-    transform: translate(-50%, -50%); /* Centers the dot on the coordinate */
+    /* transform: translate(-50%, -50%);  <-- REMOVE THIS if JS handles centering */
     display: flex;
     align-items: center;
     justify-content: center;
     transition: left 0.05s linear, top 0.05s linear;
 }
 
-/* 2. The Visual Dot (Blue Pointer) */
-#pseudo-cursor .cursor-pointer {
+/* 2. Update child selectors to match the parent class */
+.remote-cursor .cursor-pointer {
     width: 15px;
     height: 15px;
+    /* Background color is set inline by JS, but keep defaults here */
     background-color: var(--accent-blue, #2f81f7); 
     border-radius: 50%;
     box-shadow: 0 0 10px rgba(47, 129, 247, 0.5);
@@ -28,20 +29,17 @@
     transition: all 0.1s ease;
 }
 
-/* 3. VISUAL FEEDBACK: Physical Button Pressed */
-#pseudo-cursor.clicking .cursor-pointer {
+/* 3. Button Press State */
+.remote-cursor.clicking .cursor-pointer {
     transform: scale(0.8);
-    background-color: var(--accent-yellow, #FFD700); /* Turns Yellow */
+    background-color: var(--accent-yellow, #FFD700) !important;
     box-shadow: 0 0 15px var(--accent-yellow, #FFD700);
 }
 
-/* 4. VISUAL FEEDBACK: Dwell Loading Ring */
-.dwell-ring {
-    position: absolute;
-    width: 100%; height: 100%;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    box-sizing: border-box;
+/* 4. Dwell Ring */
+.remote-cursor.dwelling .dwell-ring::after {
+    opacity: 1;
+    animation: dwellFill 2s linear forwards; 
 }
 
 .dwell-ring::after {
