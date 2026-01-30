@@ -44,21 +44,25 @@ class RemoteCursor {
         return div;
     }
 
+    /* Updated updatePosition in RemoteCursor Class */
     updatePosition(angleX, angleY) {
-        // Absolute Mapping
+        // 1. Calculate Absolute Mapping
         const cx = window.innerWidth / 2;
         const cy = window.innerHeight / 2;
         const ox = angleX * MOUSE_CONFIG.scale;
         const oy = angleY * MOUSE_CONFIG.scale * (MOUSE_CONFIG.invertY ? -1 : 1);
 
-        this.x = Math.max(0, Math.min(window.innerWidth, cx + ox));
-        this.y = Math.max(0, Math.min(window.innerHeight, cy + oy));
+        // 2. Apply Boundary Clamping (Ensures the mouse never leaves the screen)
+        // We subtract the cursor size (30px) to ensure the full div stays visible
+        const cursorSize = 30; 
+        this.x = Math.max(0, Math.min(window.innerWidth - cursorSize, cx + ox));
+        this.y = Math.max(0, Math.min(window.innerHeight - cursorSize, cy + oy));
 
-        // Visual Move
+        // 3. Visual Move
         this.el.style.left = this.x + 'px';
         this.el.style.top = this.y + 'px';
 
-        // Hover Effects (inject into iframe)
+        // 4. Hover Effects (inject into iframe)
         this.dispatchHover();
     }
 

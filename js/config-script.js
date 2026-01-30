@@ -109,6 +109,7 @@ ws.onmessage = (e) => {
         const arena = document.getElementById('arena');
         const w = arena.clientWidth; 
         const h = arena.clientHeight;
+        console.log(JSON.parse(e.data));
 
         devices.forEach(data => {
             const dev = data.device; // "Arm" or "Glove"
